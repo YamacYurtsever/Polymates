@@ -241,25 +241,25 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 - [ ] RLS policy: users can only read `group_members` rows for groups they belong to
 
 ### Frontend — Dashboard (`/dashboard`)
-- [ ] List all groups the current user belongs to
-- [ ] Each group card shows name, member count
-- [ ] Create group button
+- [x] List all groups the current user belongs to
+- [x] Each group card shows name, member count
+- [x] Create group button
 
 ### Frontend — Create Group
-- [ ] Modal or page with group name + description fields
-- [ ] On submit: insert into `groups`, insert creator into `group_members` with role `admin`, generate `invite_token` (can use `crypto.randomUUID()`)
+- [x] Modal or page with group name + description fields
+- [x] On submit: insert into `groups`, insert creator into `group_members` with role `admin`, generate `invite_token` (can use `crypto.randomUUID()`)
 
 ### Frontend — Group Page (`/groups/[id]`)
-- [ ] Group name and description header
-- [ ] Members list with display names and points
-- [ ] Invite link display with copy button (`/invite/[token]`)
-- [ ] Placeholder sections for active and resolved bets (populated in M3)
+- [x] Group name and description header
+- [x] Members list with display names and points
+- [x] Invite link display with copy button (`/invite/[token]`)
+- [x] Placeholder sections for active and resolved bets (populated in M3)
 
 ### Frontend — Join via Invite (`/invite/[token]`)
-- [ ] Fetch group by `invite_token`
-- [ ] Show group name and current member count
-- [ ] Accept invite button → insert into `group_members` with role `member`
-- [ ] Redirect to `/groups/[id]` on success
+- [x] Fetch group by `invite_token`
+- [x] Show group name and current member count
+- [x] Accept invite button → insert into `group_members` with role `member`
+- [x] Redirect to `/groups/[id]` on success
 
 ---
 

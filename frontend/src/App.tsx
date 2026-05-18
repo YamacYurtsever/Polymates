@@ -5,6 +5,9 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { Login } from './pages/auth/Login'
 import { SignUp } from './pages/auth/SignUp'
 import { Profile } from './pages/Profile'
+import { Dashboard } from './pages/Dashboard'
+import { GroupPage } from './pages/GroupPage'
+import { InvitePage } from './pages/InvitePage'
 
 function Navbar() {
   const { signOut } = useAuth()
@@ -16,7 +19,12 @@ function Navbar() {
       sx={{ borderBottom: 1, borderColor: 'divider' }}
     >
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700 }}>
+        <Typography
+          variant="h6"
+          component={RouterLink}
+          to="/dashboard"
+          sx={{ flexGrow: 1, fontWeight: 700, textDecoration: 'none', color: 'inherit' }}
+        >
           Polymates
         </Typography>
         <Button component={RouterLink} to="/profile" size="small">
@@ -59,7 +67,7 @@ function App() {
         path="/dashboard"
         element={
           <ProtectedLayout>
-            <div>Dashboard</div>
+            <Dashboard />
           </ProtectedLayout>
         }
       />
@@ -67,7 +75,7 @@ function App() {
         path="/groups/:id"
         element={
           <ProtectedLayout>
-            <div>Group</div>
+            <GroupPage />
           </ProtectedLayout>
         }
       />
@@ -87,14 +95,7 @@ function App() {
           </ProtectedLayout>
         }
       />
-      <Route
-        path="/invite/:token"
-        element={
-          <ProtectedLayout>
-            <div>Join Group</div>
-          </ProtectedLayout>
-        }
-      />
+      <Route path="/invite/:token" element={<InvitePage />} />
       <Route
         path="/leaderboard/:groupId"
         element={
