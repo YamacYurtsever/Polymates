@@ -35,7 +35,6 @@ Polymates is a social betting app for friend groups. Members create binary (Yes/
 | Storage | Supabase Storage (evidence files) |
 | Arbiter | Supabase Edge Function → Anthropic API |
 | Validation | Zod |
-| Testing | Vitest + React Testing Library |
 | Code quality | ESLint + Prettier |
 | Deployment | Vercel (frontend) + Supabase (backend) |
 
@@ -212,22 +211,22 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 - [ ] Add RLS policy: users can read/update their own row only
 
 ### Frontend — Project Setup
-- [ ] Scaffold project with Vite + React + TypeScript
-- [ ] Install and configure MUI
-- [ ] Install Supabase JS client
+- [x] Scaffold project with Vite + React + TypeScript
+- [x] Install and configure MUI
+- [x] Install Supabase JS client
 - [ ] Set up `.env` with Supabase URL and anon key
-- [ ] Create Supabase client singleton (`src/lib/supabase.ts`)
+- [x] Create Supabase client singleton (`src/lib/supabase.ts`)
 
 ### Frontend — Auth
-- [ ] Auth context/provider with session state
-- [ ] Sign up page (email + password)
-- [ ] Log in page (email + password)
-- [ ] Protected route wrapper (redirects to login if no session)
-- [ ] Sign out button
+- [x] Auth context/provider with session state
+- [x] Sign up page (email + password)
+- [x] Log in page (email + password)
+- [x] Protected route wrapper (redirects to login if no session)
+- [x] Sign out button
 
 ### Frontend — Profile Page
-- [ ] `/profile` page showing display name, avatar, points balance
-- [ ] Edit display name field
+- [x] `/profile` page showing display name, avatar, points balance
+- [x] Edit display name field
 
 ---
 
