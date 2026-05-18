@@ -1,9 +1,10 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, Link as RouterLink } from 'react-router-dom'
 import { Button, AppBar, Toolbar, Typography, Box } from '@mui/material'
 import { useAuth } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Login } from './pages/auth/Login'
 import { SignUp } from './pages/auth/SignUp'
+import { Profile } from './pages/Profile'
 
 function Navbar() {
   const { signOut } = useAuth()
@@ -18,6 +19,9 @@ function Navbar() {
         <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700 }}>
           Polymates
         </Typography>
+        <Button component={RouterLink} to="/profile" size="small">
+          Profile
+        </Button>
         <Button onClick={signOut} size="small">
           Sign out
         </Button>
@@ -103,7 +107,7 @@ function App() {
         path="/profile"
         element={
           <ProtectedLayout>
-            <div>Profile</div>
+            <Profile />
           </ProtectedLayout>
         }
       />

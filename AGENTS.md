@@ -218,15 +218,15 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 - [x] Create Supabase client singleton (`src/lib/supabase.ts`)
 
 ### Frontend — Auth
-- [ ] Auth context/provider with session state
-- [ ] Sign up page (email + password)
-- [ ] Log in page (email + password)
-- [ ] Protected route wrapper (redirects to login if no session)
-- [ ] Sign out button
+- [x] Auth context/provider with session state
+- [x] Sign up page (email + password)
+- [x] Log in page (email + password)
+- [x] Protected route wrapper (redirects to login if no session)
+- [x] Sign out button
 
 ### Frontend — Profile Page
-- [ ] `/profile` page showing display name, avatar, points balance
-- [ ] Edit display name field
+- [x] `/profile` page showing display name, avatar, points balance
+- [x] Edit display name field
 
 ---
 

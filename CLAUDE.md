@@ -225,8 +225,8 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 - [x] Sign out button
 
 ### Frontend — Profile Page
-- [ ] `/profile` page showing display name, avatar, points balance
-- [ ] Edit display name field
+- [x] `/profile` page showing display name, avatar, points balance
+- [x] Edit display name field
 
 ---
 

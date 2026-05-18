@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); base=$(basename \"$f\"); if [ \"$base\" = \"CLAUDE.md\" ] || [ \"$base\" = \"AGENTS.md\" ]; then rm /Users/yamacyurtsever/Programming/polymates/AGENTS.md && ln /Users/yamacyurtsever/Programming/polymates/CLAUDE.md /Users/yamacyurtsever/Programming/polymates/AGENTS.md; fi 2>/dev/null || true",
+            "statusMessage": "Re-linking CLAUDE.md ↔ AGENTS.md"
+          }
+        ]
+      }
+    ]
+  }
+}
