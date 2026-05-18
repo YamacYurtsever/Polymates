@@ -20,6 +20,7 @@ Polymates is a social betting app for friend groups. Members create binary (Yes/
 | Evidence | Any input the API accepts | Images, PDFs, text — context window is the only limit |
 | Backend | Supabase | Auth + DB + Storage + Edge Functions covers all needs |
 | Arbiter runtime | Supabase Edge Function | Server-side secret, direct DB access, no separate server |
+| Points scope | Per-group | Each group is its own economy; leaderboards and balances are group-scoped |
 
 ---
 
@@ -49,7 +50,6 @@ Polymates is a social betting app for friend groups. Members create binary (Yes/
 | email | text | |
 | display_name | text | |
 | avatar_url | text | |
-| points | integer | Starts at 1000 on signup |
 | created_at | timestamptz | |
 
 ### `groups`
@@ -68,6 +68,7 @@ Polymates is a social betting app for friend groups. Members create binary (Yes/
 | group_id | uuid FK → groups | |
 | user_id | uuid FK → users | |
 | role | enum: admin\|member | Creator is admin |
+| points | integer | Starts at 1000 on join; scoped to this group |
 | joined_at | timestamptz | |
 
 ### `bets`
@@ -205,7 +206,7 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 
 ### Database
 - [ ] Create `users` table with all fields from schema
-- [ ] Create Postgres function `handle_new_user()` that inserts into `users` with `points = 1000` on signup
+- [ ] Create Postgres function `handle_new_user()` that inserts into `users` on signup (no points — points live in `group_members`)
 - [ ] Create trigger `on_auth_user_created` that fires `handle_new_user()` after insert on `auth.users`
 - [ ] Enable RLS on `users` table
 - [ ] Add RLS policy: users can read/update their own row only
@@ -225,7 +226,7 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 - [x] Sign out button
 
 ### Frontend — Profile Page
-- [x] `/profile` page showing display name, avatar, points balance
+- [x] `/profile` page showing display name, avatar, per-group points breakdown
 - [x] Edit display name field
 
 ---
@@ -234,7 +235,7 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 
 ### Database
 - [ ] Create `groups` table with all fields from schema
-- [ ] Create `group_members` table with all fields from schema
+- [ ] Create `group_members` table with all fields from schema (including `points integer default 1000`)
 - [ ] Enable RLS on `groups` table
 - [ ] Enable RLS on `group_members` table
 - [ ] RLS policy: users can only read groups they are a member of
@@ -247,7 +248,7 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 
 ### Frontend — Create Group
 - [ ] Modal or page with group name + description fields
-- [ ] On submit: insert into `groups`, insert creator into `group_members` with role `admin`, generate `invite_token` (can use `crypto.randomUUID()`)
+- [ ] On submit: insert into `groups`, insert creator into `group_members` with role `admin` and `points = 1000`, generate `invite_token` (can use `crypto.randomUUID()`)
 
 ### Frontend — Group Page (`/groups/[id]`)
 - [ ] Group name and description header
@@ -258,7 +259,7 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 ### Frontend — Join via Invite (`/invite/[token]`)
 - [ ] Fetch group by `invite_token`
 - [ ] Show group name and current member count
-- [ ] Accept invite button → insert into `group_members` with role `member`
+- [ ] Accept invite button → insert into `group_members` with role `member` and `points = 1000`
 - [ ] Redirect to `/groups/[id]` on success
 
 ---
@@ -304,28 +305,29 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 - [ ] RLS policy: users can insert their own positions only
 - [ ] RLS policy: users cannot update or delete positions (locked on commit)
 - [ ] Postgres function `place_bet(bet_id, user_id, side, amount)` that atomically:
-  - [ ] Checks user has sufficient points
+  - [ ] Checks user has sufficient points in `group_members` for this bet's group
   - [ ] Checks bet status is `open`
   - [ ] Checks user has no existing position on this bet
   - [ ] Inserts into `bet_positions`
-  - [ ] Deducts points from `users`
+  - [ ] Deducts points from `group_members` (scoped to bet's group)
 - [ ] Postgres function `resolve_bet(bet_id, outcome)` that:
   - [ ] Calculates parimutuel payouts
-  - [ ] Distributes points to winners
+  - [ ] Distributes points to winners via `group_members` (scoped to bet's group)
   - [ ] Awards remainder to highest staker on winning side
   - [ ] Handles zero winners edge case (refund everyone)
   - [ ] Updates bet status to `resolved` or `refunded`
 
 ### Frontend — Bet Page Wagering Panel
 - [ ] Side selector (Yes / No toggle)
-- [ ] Amount input with user's current points balance shown
-- [ ] Validation: amount > 0, amount ≤ user points, bet still open
+- [ ] Amount input with user's points balance for this group shown
+- [ ] Validation: amount > 0, amount ≤ user's group points, bet still open
 - [ ] Submit button → calls `place_bet` function
 - [ ] Lock UI after position committed (show existing position instead)
 - [ ] Optimistically update positions display after wager
 
 ### Frontend — Points Display
-- [ ] Show updated points balance in profile and navbar after wager
+- [ ] Show updated group-scoped points balance on bet page and group page after wager
+- [ ] Show per-group points breakdown on profile page
 - [ ] Show each user's stake on the bet page positions breakdown
 
 ---
