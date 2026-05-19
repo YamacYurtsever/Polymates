@@ -55,7 +55,7 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute>
       <Navbar />
-      <Box component="main" sx={{ p: 3 }}>
+      <Box component="main" sx={{ maxWidth: 900, mx: 'auto', px: 3, py: 4 }}>
         {children}
       </Box>
     </ProtectedRoute>
