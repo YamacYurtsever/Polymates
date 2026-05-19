@@ -31,3 +31,8 @@ export interface Member {
   username: string
   points: number
 }
+
+export interface Verdict {
+  outcome: BetSide
+  reasoning: string
+}
