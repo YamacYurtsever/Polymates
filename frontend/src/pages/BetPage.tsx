@@ -229,7 +229,7 @@ export function BetPage() {
       </Typography>
 
       {bet.description && (
-        <Typography color="text.secondary" sx={{ mb: 3, fontSize: '1rem', maxWidth: 680 }}>
+        <Typography color="text.secondary" sx={{ mb: 3, fontSize: '1rem' }}>
           {bet.description}
         </Typography>
       )}
