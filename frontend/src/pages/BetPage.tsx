@@ -1,96 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link as RouterLink } from 'react-router-dom'
-import {
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  Divider,
-  LinearProgress,
-  Paper,
-  Typography,
-} from '@mui/material'
+import { Alert, Box, Chip, CircularProgress, Divider, Paper, Typography } from '@mui/material'
 import { supabase } from '../lib/supabase'
-
-interface Bet {
-  id: string
-  title: string
-  description: string
-  closes_at: string
-  status: 'open' | 'closed'
-  created_at: string
-  group_id: string
-  creator_username: string
-}
-
-interface Position {
-  user_id: string
-  username: string
-  side: 'yes' | 'no'
-  amount: number
-}
-
-function useCountdown(target: string) {
-  const [remaining, setRemaining] = useState(() => new Date(target).getTime() - Date.now())
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setRemaining(new Date(target).getTime() - Date.now())
-    }, 1000)
-    return () => clearInterval(id)
-  }, [target])
-
-  if (remaining <= 0) return null
-
-  const totalSeconds = Math.floor(remaining / 1000)
-  const days = Math.floor(totalSeconds / 86400)
-  const hours = Math.floor((totalSeconds % 86400) / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-
-  if (days > 0) return `${days}d ${hours}h ${minutes}m`
-  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`
-  return `${minutes}m ${seconds}s`
-}
-
-function PositionsBreakdown({ positions }: { positions: Position[] }) {
-  const yesTotal = positions.filter((p) => p.side === 'yes').reduce((s, p) => s + p.amount, 0)
-  const noTotal = positions.filter((p) => p.side === 'no').reduce((s, p) => s + p.amount, 0)
-  const total = yesTotal + noTotal
-
-  const yesPct = total > 0 ? Math.round((yesTotal / total) * 100) : 50
-
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-        <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
-          YES — {yesTotal} pts ({positions.filter((p) => p.side === 'yes').length} bettors)
-        </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600, color: 'error.main' }}>
-          NO — {noTotal} pts ({positions.filter((p) => p.side === 'no').length} bettors)
-        </Typography>
-      </Box>
-      <LinearProgress
-        variant="determinate"
-        value={yesPct}
-        sx={{
-          height: 10,
-          borderRadius: 5,
-          bgcolor: 'error.light',
-          '& .MuiLinearProgress-bar': { bgcolor: 'success.main' },
-        }}
-      />
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-        {total} pts total at stake
-      </Typography>
-    </Box>
-  )
-}
+import { useCountdown } from '../hooks/useCountdown'
+import { PositionsBreakdown } from '../components/PositionsBreakdown'
+import type { Bet, BetPosition } from '../types'
 
 export function BetPage() {
   const { id } = useParams<{ id: string }>()
   const [bet, setBet] = useState<Bet | null>(null)
-  const [positions, setPositions] = useState<Position[]>([])
+  const [positions, setPositions] = useState<BetPosition[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const fetchedRef = useRef(false)
