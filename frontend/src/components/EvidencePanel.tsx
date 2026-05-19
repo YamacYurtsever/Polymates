@@ -1,6 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Box, Button, Divider, LinearProgress, TextField, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  LinearProgress,
+  TextField,
+  Typography,
+} from '@mui/material'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
+import imageCompression from 'browser-image-compression'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -13,14 +24,15 @@ interface EvidenceItem {
   created_at: string
 }
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB before compression
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 function isImage(path: string) {
   return /\.(jpe?g|png|gif|webp)$/i.test(path)
 }
 
-function EvidenceItem({ item }: { item: EvidenceItem }) {
+function EvidenceCard({ item }: { item: EvidenceItem }) {
   const [url, setUrl] = useState<string | null>(null)
 
   useEffect(() => {
@@ -36,36 +48,55 @@ function EvidenceItem({ item }: { item: EvidenceItem }) {
   const filename = item.storage_path.split('/').pop() ?? 'file'
 
   return (
-    <Box sx={{ py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
-      <Typography variant="caption" color="text.secondary">
-        {item.username}
-      </Typography>
-      {item.caption && (
-        <Typography variant="body2" sx={{ mt: 0.25, mb: 1 }}>
-          {item.caption}
+    <Card variant="outlined" sx={{ mb: 1.5 }}>
+      <CardContent sx={{ '&:last-child': { pb: 2 } }}>
+        <Typography variant="caption" color="text.secondary">
+          {item.username}
         </Typography>
-      )}
-      {url && isImage(item.storage_path) ? (
-        <Box
-          component="img"
-          src={url}
-          alt={item.caption ?? filename}
-          sx={{ maxWidth: '100%', maxHeight: 300, borderRadius: 1, display: 'block', mt: 0.5 }}
-        />
-      ) : url ? (
-        <Button
-          component="a"
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          size="small"
-          variant="outlined"
-          sx={{ mt: 0.5 }}
-        >
-          {filename}
-        </Button>
-      ) : null}
-    </Box>
+        {item.caption && (
+          <Typography variant="body2" sx={{ mt: 0.5, mb: 1 }}>
+            {item.caption}
+          </Typography>
+        )}
+        {url && isImage(item.storage_path) ? (
+          <Box
+            component="a"
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ display: 'inline-block', mt: item.caption ? 0 : 0.5 }}
+          >
+            <Box
+              component="img"
+              src={url}
+              alt={item.caption ?? filename}
+              sx={{
+                width: 120,
+                height: 120,
+                objectFit: 'cover',
+                borderRadius: 1,
+                display: 'block',
+                cursor: 'pointer',
+                transition: 'opacity 0.15s',
+                '&:hover': { opacity: 0.85 },
+              }}
+            />
+          </Box>
+        ) : url ? (
+          <Button
+            component="a"
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            size="small"
+            variant="outlined"
+            sx={{ mt: item.caption ? 0 : 0.5 }}
+          >
+            {filename}
+          </Button>
+        ) : null}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -143,19 +174,26 @@ export function EvidencePanel({
     }
 
     setUploading(true)
-    setUploadProgress(0)
+    setUploadProgress(10)
 
-    const ext = file.name.split('.').pop()
+    let fileToUpload: File = file
+    if (IMAGE_TYPES.includes(file.type)) {
+      fileToUpload = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        onProgress: (p) => setUploadProgress(Math.round(p * 0.6)), // 0–60% for compression
+      })
+    }
+
+    setUploadProgress(65)
+
+    const ext = fileToUpload.name.split('.').pop() ?? file.name.split('.').pop()
     const storagePath = `${user.id}/${betId}/${Date.now()}.${ext}`
 
-    // Simulate progress since Supabase JS doesn't expose upload progress
-    const progressInterval = setInterval(() => {
-      setUploadProgress((p) => Math.min(p + 20, 80))
-    }, 200)
-
-    const { error: uploadError } = await supabase.storage.from('evidence').upload(storagePath, file)
-
-    clearInterval(progressInterval)
+    const { error: uploadError } = await supabase.storage
+      .from('evidence')
+      .upload(storagePath, fileToUpload)
 
     if (uploadError) {
       setError(uploadError.message)
@@ -163,7 +201,7 @@ export function EvidencePanel({
       return
     }
 
-    setUploadProgress(100)
+    setUploadProgress(90)
 
     const { data: inserted, error: insertError } = await supabase
       .from('evidence')
@@ -181,6 +219,8 @@ export function EvidencePanel({
       setUploading(false)
       return
     }
+
+    setUploadProgress(100)
 
     setEvidence((prev) => [
       ...prev,
@@ -265,7 +305,7 @@ export function EvidencePanel({
         <Box>
           {canSubmit && <Divider sx={{ mb: 2 }} />}
           {evidence.map((item) => (
-            <EvidenceItem key={item.id} item={item} />
+            <EvidenceCard key={item.id} item={item} />
           ))}
         </Box>
       )}
