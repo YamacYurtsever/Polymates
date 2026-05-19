@@ -3,14 +3,14 @@ import {
   Alert,
   Box,
   Button,
+  ButtonBase,
   CircularProgress,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { tokens } from '../theme'
 import type { BetPosition, BetSide } from '../types'
 
 interface Props {
@@ -20,10 +20,11 @@ interface Props {
   onWager: (position: BetPosition) => void
 }
 
+const QUICK_AMOUNTS = [10, 50, 100] as const
+
 export function WageringPanel({ betId, groupId, status, onWager }: Props) {
   const { user } = useAuth()
   const [points, setPoints] = useState<number | null>(null)
-  const [existingPosition, setExistingPosition] = useState<BetPosition | null>(null)
   const [loading, setLoading] = useState(true)
 
   const [side, setSide] = useState<BetSide>('yes')
@@ -34,39 +35,14 @@ export function WageringPanel({ betId, groupId, status, onWager }: Props) {
   useEffect(() => {
     if (!user) return
     async function fetchState() {
-      const [pointsRes, positionRes] = await Promise.all([
-        supabase
-          .from('group_members')
-          .select('points')
-          .eq('group_id', groupId)
-          .eq('user_id', user!.id)
-          .single(),
-        supabase
-          .from('bet_positions')
-          .select('user_id, side, amount, users(username)')
-          .eq('bet_id', betId)
-          .eq('user_id', user!.id)
-          .maybeSingle(),
-      ])
+      const { data } = await supabase
+        .from('group_members')
+        .select('points')
+        .eq('group_id', groupId)
+        .eq('user_id', user!.id)
+        .single()
 
-      if (pointsRes.data) setPoints(pointsRes.data.points)
-
-      if (positionRes.data) {
-        type Row = {
-          user_id: string
-          side: BetSide
-          amount: number
-          users: { username: string } | null
-        }
-        const row = positionRes.data as unknown as Row
-        setExistingPosition({
-          user_id: row.user_id,
-          side: row.side,
-          amount: row.amount,
-          username: row.users?.username ?? 'You',
-        })
-      }
-
+      if (data) setPoints(data.points)
       setLoading(false)
     }
     fetchState()
@@ -97,8 +73,8 @@ export function WageringPanel({ betId, groupId, status, onWager }: Props) {
       side,
       amount: parsed,
     }
-    setExistingPosition(newPosition)
     setPoints((p) => (p !== null ? p - parsed : null))
+    setAmount('')
     onWager(newPosition)
     setSubmitting(false)
   }
@@ -106,26 +82,7 @@ export function WageringPanel({ betId, groupId, status, onWager }: Props) {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-        <CircularProgress size={24} />
-      </Box>
-    )
-  }
-
-  if (existingPosition) {
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          Your position:
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 700,
-            color: existingPosition.side === 'yes' ? 'success.main' : 'error.main',
-          }}
-        >
-          {existingPosition.side.toUpperCase()} — {existingPosition.amount} pts
-        </Typography>
+        <CircularProgress size={20} />
       </Box>
     )
   }
@@ -141,59 +98,126 @@ export function WageringPanel({ betId, groupId, status, onWager }: Props) {
   const parsedAmount = parseInt(amount) || 0
   const isValid = parsedAmount > 0 && points !== null && parsedAmount <= points
 
-  return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-    >
-      {error && <Alert severity="error">{error}</Alert>}
+  const accentColor = side === 'yes' ? tokens.yes : tokens.no
+  const accentHover = side === 'yes' ? '#1f9b51' : '#cf3a48'
 
-      <ToggleButtonGroup
-        value={side}
-        exclusive
-        onChange={(_, v) => {
-          if (v) setSide(v)
+  return (
+    <Box component="form" onSubmit={handleSubmit}>
+      {error && (
+        <Alert severity="error" sx={{ mb: 1.5 }}>
+          {error}
+        </Alert>
+      )}
+
+      <Box
+        sx={{
+          display: { xs: 'grid', sm: 'flex' },
+          gridTemplateAreas: { xs: '"yes no submit" "amount amount quick"' },
+          gridTemplateColumns: { xs: '1fr 1fr 1fr' },
+          alignItems: 'center',
+          gap: 1,
+          width: '100%',
         }}
-        size="small"
       >
-        <ToggleButton
-          value="yes"
-          sx={{ px: 4, fontWeight: 700, '&.Mui-selected': { bgcolor: 'success.light' } }}
+        <ButtonBase
+          onClick={() => setSide('yes')}
+          sx={{
+            gridArea: { xs: 'yes' },
+            flex: { sm: 1 },
+            py: 1,
+            borderRadius: 1,
+            border: 1.5,
+            borderColor: side === 'yes' ? tokens.yes : 'divider',
+            bgcolor: side === 'yes' ? tokens.yesTint : '#fff',
+            fontSize: '0.85rem',
+            fontWeight: 650,
+            letterSpacing: '0.08em',
+            color: side === 'yes' ? tokens.yes : 'text.secondary',
+            transition: 'all 150ms ease-out',
+            '&:hover': { borderColor: tokens.yes },
+          }}
         >
           YES
-        </ToggleButton>
-        <ToggleButton
-          value="no"
-          sx={{ px: 4, fontWeight: 700, '&.Mui-selected': { bgcolor: 'error.light' } }}
+        </ButtonBase>
+
+        <ButtonBase
+          onClick={() => setSide('no')}
+          sx={{
+            gridArea: { xs: 'no' },
+            flex: { sm: 1 },
+            py: 1,
+            borderRadius: 1,
+            border: 1.5,
+            borderColor: side === 'no' ? tokens.no : 'divider',
+            bgcolor: side === 'no' ? tokens.noTint : '#fff',
+            fontSize: '0.85rem',
+            fontWeight: 650,
+            letterSpacing: '0.08em',
+            color: side === 'no' ? tokens.no : 'text.secondary',
+            transition: 'all 150ms ease-out',
+            '&:hover': { borderColor: tokens.no },
+          }}
         >
           NO
-        </ToggleButton>
-      </ToggleButtonGroup>
+        </ButtonBase>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <TextField
-          label="Points to stake"
           type="number"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          slotProps={{ htmlInput: { min: 1, max: points ?? undefined } }}
+          onChange={(e) => {
+            const v = e.target.value
+            if (points !== null && parseInt(v) > points) setAmount(String(points))
+            else setAmount(v)
+          }}
+          slotProps={{ htmlInput: { min: 1, max: points ?? undefined, inputMode: 'numeric' } }}
+          placeholder={points !== null ? `Max ${points.toLocaleString()}` : 'Amount'}
           size="small"
-          sx={{ width: 180 }}
+          sx={{ gridArea: { xs: 'amount' }, flex: { sm: 2 } }}
           required
         />
-        {points !== null && (
-          <Typography variant="caption" color="text.secondary">
-            Balance: {points} pts
-          </Typography>
-        )}
-      </Box>
 
-      <Box>
-        <Button type="submit" variant="contained" disabled={submitting || !isValid}>
-          {submitting ? 'Placing…' : 'Place Bet'}
+        <Box sx={{ gridArea: { xs: 'quick' }, display: 'flex', gap: 0.5 }}>
+          {QUICK_AMOUNTS.map((n) => (
+            <Button
+              key={n}
+              size="small"
+              variant="outlined"
+              onClick={() => setAmount(String(Math.min(n, points ?? n)))}
+              disabled={points !== null && n > points}
+              sx={{ minWidth: 0, width: 36, height: 36, p: 0, fontSize: '0.75rem' }}
+            >
+              {n}
+            </Button>
+          ))}
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => points !== null && setAmount(String(points))}
+            disabled={points === null || points === 0}
+            sx={{ minWidth: 0, width: 36, height: 36, p: 0, fontSize: '0.75rem' }}
+          >
+            Max
+          </Button>
+        </Box>
+
+        <Button
+          type="submit"
+          variant="contained"
+          size="small"
+          disabled={submitting || !isValid}
+          sx={{
+            gridArea: { xs: 'submit' },
+            flex: { sm: 1 },
+            bgcolor: accentColor,
+            '&:hover': { bgcolor: accentHover },
+            '&.Mui-disabled': { bgcolor: tokens.hairline, color: tokens.inkSecondary },
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {submitting ? 'Placing…' : 'Place bet'}
         </Button>
       </Box>
+
     </Box>
   )
 }

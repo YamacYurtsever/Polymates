@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom'
-import { Box, Button, Container, Link, TextField, Typography, Alert } from '@mui/material'
+import { Alert, Box, Button, Link, TextField, Typography } from '@mui/material'
 import { supabase } from '../../lib/supabase'
+import { tokens } from '../../theme'
 
 export function Login() {
   const navigate = useNavigate()
@@ -19,32 +20,72 @@ export function Login() {
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
-      setError(error.message)
-    } else {
-      navigate(next)
-    }
-
+    if (error) setError(error.message)
+    else navigate(next)
     setLoading(false)
   }
 
   return (
-    <Container maxWidth="xs">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 2,
+        bgcolor: tokens.bg,
+      }}
+    >
       <Box
+        component={RouterLink}
+        to="/"
         sx={{
-          mt: 8,
+          position: 'fixed',
+          top: 20,
+          left: 24,
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: 2,
+          gap: 1,
+          textDecoration: 'none',
+          color: 'inherit',
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
-          Log in to Polymates
+        <Box
+          sx={{
+            width: 22,
+            height: 22,
+            borderRadius: '6px',
+            background: `linear-gradient(135deg, ${tokens.brand}, #5B3FFF)`,
+          }}
+        />
+        <Typography sx={{ fontWeight: 650, fontSize: '1.05rem', letterSpacing: '-0.015em' }}>
+          Polymates
+        </Typography>
+      </Box>
+
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: 380,
+          p: { xs: 3, sm: 4 },
+          border: 1,
+          borderColor: 'divider',
+          borderRadius: 1.5,
+          bgcolor: '#fff',
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{ mb: 0.5, fontSize: '1.65rem', letterSpacing: '-0.02em' }}
+        >
+          Welcome back
+        </Typography>
+        <Typography color="text.secondary" sx={{ mb: 3, fontSize: '0.9rem' }}>
+          Log in to continue.
         </Typography>
 
         {error && (
-          <Alert severity="error" sx={{ width: '100%' }}>
+          <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
@@ -52,7 +93,7 @@ export function Login() {
         <Box
           component="form"
           onSubmit={handleSubmit}
-          sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}
         >
           <TextField
             label="Email"
@@ -72,21 +113,22 @@ export function Login() {
             fullWidth
             autoComplete="current-password"
           />
-          <Button type="submit" variant="contained" fullWidth disabled={loading}>
+          <Button type="submit" variant="contained" size="large" fullWidth disabled={loading} sx={{ mt: 1 }}>
             {loading ? 'Logging in…' : 'Log in'}
           </Button>
         </Box>
 
-        <Typography variant="body2">
+        <Typography variant="body2" sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}>
           No account?{' '}
           <Link
             component={RouterLink}
             to={next !== '/dashboard' ? `/signup?next=${encodeURIComponent(next)}` : '/signup'}
+            sx={{ color: tokens.brand, fontWeight: 600, textDecoration: 'none' }}
           >
             Sign up
           </Link>
         </Typography>
       </Box>
-    </Container>
+    </Box>
   )
 }

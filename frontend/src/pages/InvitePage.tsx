@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom'
-import { Alert, Box, Button, CircularProgress, Container, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Stack, Typography } from '@mui/material'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { tokens } from '../theme'
 
 interface GroupPreview {
   id: string
@@ -63,51 +64,90 @@ export function InvitePage() {
     }
   }
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    )
-  }
-
   return (
-    <Container maxWidth="xs">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 2,
+        bgcolor: tokens.bg,
+      }}
+    >
+      <Box
+        component={RouterLink}
+        to="/"
+        sx={{
+          position: 'fixed',
+          top: 20,
+          left: 24,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          textDecoration: 'none',
+          color: 'inherit',
+        }}
+      >
+        <Box
+          sx={{
+            width: 22,
+            height: 22,
+            borderRadius: '6px',
+            background: `linear-gradient(135deg, ${tokens.brand}, #5B3FFF)`,
+          }}
+        />
+        <Typography sx={{ fontWeight: 650, fontSize: '1.05rem', letterSpacing: '-0.015em' }}>
+          Polymates
+        </Typography>
+      </Box>
+
       <Box
         sx={{
-          mt: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          alignItems: 'center',
+          width: '100%',
+          maxWidth: 420,
+          p: { xs: 3, sm: 4 },
+          border: 1,
+          borderColor: 'divider',
+          borderRadius: 1.5,
+          bgcolor: '#fff',
           textAlign: 'center',
         }}
       >
-        {error && !group ? (
-          <Alert severity="error" sx={{ width: '100%' }}>
-            {error}
-          </Alert>
+        {loading ? (
+          <CircularProgress size={24} />
+        ) : error && !group ? (
+          <Alert severity="error">{error}</Alert>
         ) : group ? (
           <>
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              You're invited to
+            <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: '0.08em' }}>
+              YOU'RE INVITED TO
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700 }}>
+            <Typography
+              variant="h3"
+              sx={{ mt: 1, mb: 0.5, letterSpacing: '-0.02em' }}
+            >
               {group.name}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              {group.member_count} {group.member_count === 1 ? 'member' : 'members'} · You'll start
+              with{' '}
+              <span className="tabular" style={{ fontWeight: 600, color: tokens.brand }}>
+                1,000 pts
+              </span>
             </Typography>
 
             {error && (
-              <Alert severity="error" sx={{ width: '100%' }}>
+              <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
               </Alert>
             )}
 
             {!user ? (
-              <>
-                <Typography color="text.secondary">Sign in to accept this invite.</Typography>
+              <Stack spacing={1}>
+                <Typography color="text.secondary" variant="body2" sx={{ mb: 0.5 }}>
+                  Sign in to accept this invite.
+                </Typography>
                 <Button
                   component={RouterLink}
                   to={`/signup?next=${encodeURIComponent(window.location.pathname)}`}
@@ -126,30 +166,35 @@ export function InvitePage() {
                 >
                   Log in
                 </Button>
-              </>
+              </Stack>
             ) : alreadyMember ? (
               <>
-                <Typography color="text.secondary">
-                  You're already a member of this group.
+                <Typography color="text.secondary" variant="body2" sx={{ mb: 2 }}>
+                  You're already a member.
                 </Typography>
-                <Button variant="contained" onClick={() => navigate(`/groups/${group.id}`)}>
-                  Go to Group
+                <Button
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  onClick={() => navigate(`/groups/${group.id}`)}
+                >
+                  Go to group
                 </Button>
               </>
             ) : (
               <Button
                 variant="contained"
                 size="large"
+                fullWidth
                 onClick={handleJoin}
                 disabled={joining}
-                sx={{ mt: 1 }}
               >
-                {joining ? 'Joining…' : 'Accept Invite'}
+                {joining ? 'Joining…' : 'Accept invite'}
               </Button>
             )}
           </>
         ) : null}
       </Box>
-    </Container>
+    </Box>
   )
 }

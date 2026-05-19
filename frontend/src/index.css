@@ -16,6 +16,9 @@ html {
 body {
   min-height: 100vh;
   line-height: 1.5;
+  background: #fafafa;
+  color: #0e0e0f;
+  font-feature-settings: 'cv11', 'ss01';
 }
 
 #root {
@@ -35,4 +38,22 @@ button,
 textarea,
 select {
   font: inherit;
+}
+
+.tabular,
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: rgba(45, 91, 255, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

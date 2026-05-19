@@ -26,8 +26,11 @@ drop policy if exists "verdicts: read as group member" on public.verdicts;
 create policy "verdicts: read as group member"
   on public.verdicts for select
   using (
-    public.is_group_member(
-      (select group_id from public.bets where id = bet_id)
+    exists (
+      select 1 from public.bets b
+      join public.group_members gm on gm.group_id = b.group_id
+      where b.id = bet_id
+        and gm.user_id = auth.uid()
     )
   );
 
