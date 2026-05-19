@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom'
 import { Alert, Box, Button, CircularProgress, Container, Typography } from '@mui/material'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
@@ -105,7 +105,29 @@ export function InvitePage() {
               </Alert>
             )}
 
-            {alreadyMember ? (
+            {!user ? (
+              <>
+                <Typography color="text.secondary">Sign in to accept this invite.</Typography>
+                <Button
+                  component={RouterLink}
+                  to={`/signup?next=${encodeURIComponent(window.location.pathname)}`}
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                >
+                  Sign up
+                </Button>
+                <Button
+                  component={RouterLink}
+                  to={`/login?next=${encodeURIComponent(window.location.pathname)}`}
+                  variant="outlined"
+                  size="large"
+                  fullWidth
+                >
+                  Log in
+                </Button>
+              </>
+            ) : alreadyMember ? (
               <>
                 <Typography color="text.secondary">
                   You're already a member of this group.

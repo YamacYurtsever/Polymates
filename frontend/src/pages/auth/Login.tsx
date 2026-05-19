@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom'
 import { Box, Button, Container, Link, TextField, Typography, Alert } from '@mui/material'
 import { supabase } from '../../lib/supabase'
 
 export function Login() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const next = searchParams.get('next') ?? '/dashboard'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -20,7 +22,7 @@ export function Login() {
     if (error) {
       setError(error.message)
     } else {
-      navigate('/dashboard')
+      navigate(next)
     }
 
     setLoading(false)
@@ -77,7 +79,10 @@ export function Login() {
 
         <Typography variant="body2">
           No account?{' '}
-          <Link component={RouterLink} to="/signup">
+          <Link
+            component={RouterLink}
+            to={next !== '/dashboard' ? `/signup?next=${encodeURIComponent(next)}` : '/signup'}
+          >
             Sign up
           </Link>
         </Typography>
