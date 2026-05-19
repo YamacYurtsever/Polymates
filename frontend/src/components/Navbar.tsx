@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
+import logo from '../assets/logo.png'
 import {
   AppBar,
   Avatar,
@@ -47,12 +48,10 @@ export function Navbar() {
           }}
         >
           <Box
-            sx={{
-              width: 22,
-              height: 22,
-              borderRadius: '6px',
-              background: `linear-gradient(135deg, ${tokens.brand}, #5B3FFF)`,
-            }}
+            component="img"
+            src={logo}
+            alt="Polymates"
+            sx={{ width: 24, height: 24, objectFit: 'contain' }}
           />
           <Typography
             sx={{
