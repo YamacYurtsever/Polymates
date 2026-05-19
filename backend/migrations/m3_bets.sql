@@ -1,9 +1,16 @@
 -- M3: Bets & Positions
 
-create type public.bet_status as enum ('open', 'closed');
-create type public.bet_side as enum ('yes', 'no');
+do $$ begin
+  create type public.bet_status as enum ('open', 'closed');
+exception when duplicate_object then null;
+end $$;
 
-create table public.bets (
+do $$ begin
+  create type public.bet_side as enum ('yes', 'no');
+exception when duplicate_object then null;
+end $$;
+
+create table if not exists public.bets (
   id          uuid primary key default gen_random_uuid(),
   group_id    uuid not null references public.groups(id) on delete cascade,
   creator_id  uuid not null references public.users(id) on delete cascade,
@@ -14,7 +21,7 @@ create table public.bets (
   created_at  timestamptz not null default now()
 );
 
-create table public.bet_positions (
+create table if not exists public.bet_positions (
   id         uuid primary key default gen_random_uuid(),
   bet_id     uuid not null references public.bets(id) on delete cascade,
   user_id    uuid not null references public.users(id) on delete cascade,
@@ -28,7 +35,7 @@ create table public.bet_positions (
 alter table public.bets enable row level security;
 alter table public.bet_positions enable row level security;
 
--- bets: readable by group members
+drop policy if exists "bets: read as group member" on public.bets;
 create policy "bets: read as group member"
   on public.bets for select
   using (
@@ -39,7 +46,7 @@ create policy "bets: read as group member"
     )
   );
 
--- bets: insertable by group members
+drop policy if exists "bets: insert as group member" on public.bets;
 create policy "bets: insert as group member"
   on public.bets for insert
   with check (
@@ -51,7 +58,7 @@ create policy "bets: insert as group member"
     )
   );
 
--- bet_positions: readable by group members of the bet's group
+drop policy if exists "bet_positions: read as group member" on public.bet_positions;
 create policy "bet_positions: read as group member"
   on public.bet_positions for select
   using (
@@ -63,7 +70,6 @@ create policy "bet_positions: read as group member"
     )
   );
 
--- RPC: create a bet (avoids client-side auth.uid() JWT issues, same pattern as create_group)
 create or replace function public.create_bet(
   p_group_id    uuid,
   p_title       text,
