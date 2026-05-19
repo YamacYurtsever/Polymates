@@ -26,7 +26,7 @@ export function CreateGroup() {
   }
 
   return (
-    <Box sx={{ maxWidth: 480, mx: 'auto' }}>
+    <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
         New Group
       </Typography>
