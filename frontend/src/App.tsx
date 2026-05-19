@@ -8,6 +8,8 @@ import { SignUp } from './pages/auth/SignUp'
 import { Dashboard } from './pages/Dashboard'
 import { GroupPage } from './pages/GroupPage'
 import { InvitePage } from './pages/InvitePage'
+import { CreateBet } from './pages/CreateBet'
+import { BetPage } from './pages/BetPage'
 
 function AccountMenu() {
   const { user, signOut } = useAuth()
@@ -94,7 +96,7 @@ function App() {
         path="/bets/new"
         element={
           <ProtectedLayout>
-            <div>Create Bet</div>
+            <CreateBet />
           </ProtectedLayout>
         }
       />
@@ -102,7 +104,7 @@ function App() {
         path="/bets/:id"
         element={
           <ProtectedLayout>
-            <div>Bet</div>
+            <BetPage />
           </ProtectedLayout>
         }
       />

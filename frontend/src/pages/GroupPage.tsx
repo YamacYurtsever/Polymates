@@ -30,6 +30,13 @@ interface Member {
   points: number
 }
 
+interface Bet {
+  id: string
+  title: string
+  closes_at: string
+  status: 'open' | 'closed'
+}
+
 export function GroupPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
@@ -38,6 +45,7 @@ export function GroupPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [bets, setBets] = useState<Bet[]>([])
 
   useEffect(() => {
     if (!id) return
@@ -45,12 +53,17 @@ export function GroupPage() {
     async function fetchGroup() {
       setLoading(true)
 
-      const [groupRes, membersRes] = await Promise.all([
+      const [groupRes, membersRes, betsRes] = await Promise.all([
         supabase.from('groups').select('id, name, invite_token').eq('id', id!).single(),
         supabase
           .from('group_members')
           .select('user_id, points, users(username)')
           .eq('group_id', id!),
+        supabase
+          .from('bets')
+          .select('id, title, closes_at, status')
+          .eq('group_id', id!)
+          .order('created_at', { ascending: false }),
       ])
 
       if (groupRes.error) {
@@ -66,6 +79,10 @@ export function GroupPage() {
           points: row.points,
         }))
         setMembers(mapped)
+      }
+
+      if (!betsRes.error && betsRes.data) {
+        setBets(betsRes.data as Bet[])
       }
 
       setLoading(false)
@@ -171,18 +188,76 @@ export function GroupPage() {
             New Bet
           </Button>
         </Box>
-        <Typography color="text.secondary" variant="body2">
-          No active bets yet.
-        </Typography>
+        {bets.filter((b) => b.status === 'open').length === 0 ? (
+          <Typography color="text.secondary" variant="body2">
+            No active bets yet.
+          </Typography>
+        ) : (
+          bets
+            .filter((b) => b.status === 'open')
+            .map((b) => (
+              <Box
+                key={b.id}
+                component={RouterLink}
+                to={`/bets/${b.id}`}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  py: 1.5,
+                  borderBottom: 1,
+                  borderColor: 'divider',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  '&:hover': { bgcolor: 'action.hover' },
+                  px: 1,
+                }}
+              >
+                <Typography variant="body2">{b.title}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {new Date(b.closes_at).toLocaleDateString()}
+                </Typography>
+              </Box>
+            ))
+        )}
       </Box>
 
       <Box>
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
           Resolved Bets
         </Typography>
-        <Typography color="text.secondary" variant="body2">
-          No resolved bets yet.
-        </Typography>
+        {bets.filter((b) => b.status === 'closed').length === 0 ? (
+          <Typography color="text.secondary" variant="body2">
+            No resolved bets yet.
+          </Typography>
+        ) : (
+          bets
+            .filter((b) => b.status === 'closed')
+            .map((b) => (
+              <Box
+                key={b.id}
+                component={RouterLink}
+                to={`/bets/${b.id}`}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  py: 1.5,
+                  borderBottom: 1,
+                  borderColor: 'divider',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  '&:hover': { bgcolor: 'action.hover' },
+                  px: 1,
+                }}
+              >
+                <Typography variant="body2">{b.title}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {b.status}
+                </Typography>
+              </Box>
+            ))
+        )}
       </Box>
 
       <Snackbar
