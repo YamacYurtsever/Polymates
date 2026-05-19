@@ -9,6 +9,7 @@ export function useCountdownState(target: string): CountdownState | null {
   const [remaining, setRemaining] = useState(() => new Date(target).getTime() - Date.now())
 
   useEffect(() => {
+    setRemaining(new Date(target).getTime() - Date.now())
     const id = setInterval(() => {
       setRemaining(new Date(target).getTime() - Date.now())
     }, 1000)

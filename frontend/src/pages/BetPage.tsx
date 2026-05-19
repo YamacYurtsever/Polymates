@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, Link as RouterLink } from 'react-router-dom'
 import { Alert, Box, Chip, CircularProgress, Tab, Tabs, Typography } from '@mui/material'
 import { supabase } from '../lib/supabase'
@@ -123,6 +123,34 @@ export function BetPage() {
 
   const countdown = useCountdownState(bet?.closes_at ?? new Date().toISOString())
 
+  // Invoke resolve-bet when the countdown reaches zero while the user is on the page
+  const resolveInvokedRef = useRef(false)
+  useEffect(() => {
+    if (!id || !bet || verdict || resolveInvokedRef.current) return
+    if (countdown === null && new Date(bet.closes_at) < new Date()) {
+      resolveInvokedRef.current = true
+      supabase.functions.invoke('resolve-bet', { body: { bet_id: id } })
+    }
+  }, [countdown, bet, verdict, id])
+
+  // Poll for verdict every 3s after deadline as realtime fallback.
+  // countdown is a dependency so this re-runs the moment it transitions to null.
+  useEffect(() => {
+    if (!id || !bet || verdict || countdown !== null) return
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from('verdicts')
+        .select('outcome, reasoning')
+        .eq('bet_id', id)
+        .maybeSingle()
+      if (data) {
+        setVerdict(data as Verdict)
+        setBet((prev) => (prev ? { ...prev, status: 'closed' } : prev))
+      }
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [id, bet, verdict, countdown])
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
@@ -161,23 +189,6 @@ export function BetPage() {
             color: verdict ? tokens.brand : bet.status === 'open' ? tokens.yes : tokens.no,
           }}
         />
-        {countdown && bet.status === 'open' && (
-          <Typography
-            variant="caption"
-            className="tabular"
-            sx={{
-              fontWeight: 600,
-              color: countdown.urgent ? tokens.no : 'text.secondary',
-            }}
-          >
-            {countdown.text}
-          </Typography>
-        )}
-        {!countdown && bet.status === 'open' && (
-          <Typography variant="caption" sx={{ fontWeight: 600, color: tokens.no }}>
-            closing
-          </Typography>
-        )}
       </Box>
 
       <Typography
@@ -217,22 +228,14 @@ export function BetPage() {
             borderTop: 1,
             borderColor: 'divider',
             display: 'flex',
-            gap: 4,
+            columnGap: 4,
+            rowGap: 1,
             flexWrap: 'wrap',
           }}
         >
           {[
             { label: 'Pool', value: `${pool.toLocaleString()} pts` },
-            { label: 'Bettors', value: positions.length },
-            {
-              label: 'Closes',
-              value: new Date(bet.closes_at).toLocaleString([], {
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-              }),
-            },
+            { label: 'Bettors', value: String(positions.length) },
           ].map(({ label, value }) => (
             <Box key={label} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
               <Typography variant="caption" color="text.secondary">
@@ -243,6 +246,33 @@ export function BetPage() {
               </Typography>
             </Box>
           ))}
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
+            <Typography variant="caption" color="text.secondary">
+              Closes
+            </Typography>
+            <Typography className="tabular" sx={{ fontWeight: 650, fontSize: '0.9rem' }}>
+              {new Date(bet.closes_at).toLocaleString([], {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+              })}
+            </Typography>
+            {bet.status === 'open' && countdown && (
+              <Typography
+                className="tabular"
+                variant="caption"
+                sx={{ fontWeight: 600, color: 'text.secondary' }}
+              >
+                ({countdown.text})
+              </Typography>
+            )}
+            {bet.status === 'open' && !countdown && (
+              <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                (closing)
+              </Typography>
+            )}
+          </Box>
         </Box>
       </Box>
 
@@ -252,7 +282,28 @@ export function BetPage() {
         </Box>
       )}
 
-      {!verdict && (
+      {!verdict && (bet.status === 'closed' || isPastDeadline) && (
+        <Box
+          sx={{
+            mb: 4,
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: 1.25,
+            p: 2.5,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            bgcolor: '#fff',
+          }}
+        >
+          <CircularProgress size={14} thickness={5} sx={{ animationDuration: '2.5s' }} />
+          <Typography variant="body2" color="text.secondary">
+            The judge is deliberating…
+          </Typography>
+        </Box>
+      )}
+
+      {!verdict && !isPastDeadline && bet.status === 'open' && (
         <Box
           sx={{
             border: 1,
@@ -303,26 +354,6 @@ export function BetPage() {
         <EvidencePanel betId={bet.id} closesAt={bet.closes_at} status={bet.status} />
       )}
 
-      {!verdict && (bet.status === 'closed' || isPastDeadline) && (
-        <Box
-          sx={{
-            mt: 4,
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 1.25,
-            p: 2.5,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            bgcolor: '#fff',
-          }}
-        >
-          <CircularProgress size={14} thickness={5} />
-          <Typography variant="body2" color="text.secondary">
-            The judge is deliberating…
-          </Typography>
-        </Box>
-      )}
     </Box>
   )
 }

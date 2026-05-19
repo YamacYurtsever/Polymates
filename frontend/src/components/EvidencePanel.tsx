@@ -7,7 +7,6 @@ import {
   CardContent,
   Dialog,
   DialogContent,
-  Divider,
   IconButton,
   LinearProgress,
   TextField,
@@ -15,6 +14,7 @@ import {
 } from '@mui/material'
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
+import CloseIcon from '@mui/icons-material/Close'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import imageCompression from 'browser-image-compression'
 import { supabase } from '../lib/supabase'
@@ -32,6 +32,8 @@ interface EvidenceItem {
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+const CARD_WIDTH = 160
+const CARD_HEIGHT = 192
 
 function isImage(path: string) {
   return /\.(jpe?g|png|gif|webp)$/i.test(path)
@@ -65,21 +67,29 @@ function EvidenceCard({ item, onClick }: { item: EvidenceItem; onClick: () => vo
       variant="outlined"
       onClick={onClick}
       sx={{
-        width: 160,
+        width: CARD_WIDTH,
+        height: CARD_HEIGHT,
         flexShrink: 0,
         cursor: 'pointer',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
         '&:hover': { borderColor: 'text.secondary' },
       }}
     >
-      {url && isImage(item.storage_path) ? (
-        <Box
-          component="img"
-          src={url}
-          alt={item.caption ?? filename}
-          sx={{ width: '100%', height: 120, objectFit: 'cover', display: 'block' }}
-        />
-      ) : null}
-      <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+      {isImage(item.storage_path) && (
+        <Box sx={{ width: '100%', height: 120, bgcolor: 'divider', overflow: 'hidden' }}>
+          {url && (
+            <Box
+              component="img"
+              src={url}
+              alt={item.caption ?? filename}
+              sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          )}
+        </Box>
+      )}
+      <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 }, flexGrow: 1, overflow: 'hidden' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="caption" color="text.secondary">
             {item.username}
@@ -391,76 +401,128 @@ export function EvidencePanel({
 
   return (
     <Box>
-      {canSubmit && (
-        <Box component="form" onSubmit={handleUpload} sx={{ mb: 3 }}>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-          <Box
-            sx={{
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: 1,
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-            }}
-          >
-            <Button
-              component="label"
-              variant="outlined"
-              startIcon={<UploadFileIcon />}
-              size="small"
-            >
-              {file ? file.name : 'Choose file'}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={ALLOWED_TYPES.join(',')}
-                hidden
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              />
-            </Button>
-            <TextField
-              label="Caption (optional)"
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              size="small"
-              fullWidth
-              slotProps={{ htmlInput: { maxLength: 80 } }}
-              helperText={`${caption.length}/80`}
-            />
-            {uploading && (
-              <LinearProgress
-                variant="determinate"
-                value={uploadProgress}
-                sx={{ borderRadius: 1 }}
-              />
-            )}
-            <Button type="submit" variant="contained" size="small" disabled={!file || uploading}>
-              {uploading ? 'Uploading…' : 'Submit Evidence'}
-            </Button>
-          </Box>
-        </Box>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
       )}
 
-      {evidence.length === 0 ? (
+      {evidence.length === 0 && !canSubmit && (
         <Typography variant="body2" color="text.secondary">
           No evidence submitted yet.
         </Typography>
-      ) : (
-        <Box>
-          {canSubmit && <Divider sx={{ mb: 2 }} />}
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-            {evidence.map((item, i) => (
-              <EvidenceCard key={item.id} item={item} onClick={() => setSelectedIndex(i)} />
-            ))}
-          </Box>
-        </Box>
       )}
+
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'flex-start' }}>
+        {canSubmit && (
+          <Box
+            component="form"
+            onSubmit={handleUpload}
+            sx={{ width: CARD_WIDTH, flexShrink: 0 }}
+          >
+            {!file ? (
+              <Box
+                onClick={() => fileInputRef.current?.click()}
+                sx={{
+                  width: CARD_WIDTH,
+                  height: CARD_HEIGHT,
+                  border: '1.5px dashed',
+                  borderColor: 'divider',
+                  borderRadius: 1.25,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 0.75,
+                  '&:hover': { borderColor: 'text.secondary' },
+                }}
+              >
+                <UploadFileIcon sx={{ color: 'text.disabled', fontSize: 28 }} />
+                <Typography variant="caption" color="text.secondary">
+                  Add evidence
+                </Typography>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ALLOWED_TYPES.join(',')}
+                  hidden
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                />
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  width: CARD_WIDTH,
+                  height: CARD_HEIGHT,
+                  border: 1,
+                  borderColor: 'divider',
+                  borderRadius: 1.25,
+                  p: 1.5,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 1,
+                  overflow: 'hidden',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      flexGrow: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {file.name}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => setFile(null)}
+                    sx={{ p: 0.25, flexShrink: 0 }}
+                  >
+                    <CloseIcon sx={{ fontSize: 14 }} />
+                  </IconButton>
+                </Box>
+                <TextField
+                  placeholder="Caption"
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  size="small"
+                  multiline
+                  slotProps={{ htmlInput: { maxLength: 80 } }}
+                  sx={{
+                    flexGrow: 1,
+                    '& .MuiInputBase-root': { height: '100%', alignItems: 'flex-start' },
+                    '& .MuiInputBase-input': { fontSize: '0.75rem', py: 0.75 },
+                  }}
+                />
+                {uploading && (
+                  <LinearProgress
+                    variant="determinate"
+                    value={uploadProgress}
+                    sx={{ borderRadius: 1 }}
+                  />
+                )}
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="small"
+                  disabled={uploading}
+                  sx={{ fontSize: '0.75rem', py: 0.5 }}
+                >
+                  {uploading ? 'Uploading…' : 'Submit'}
+                </Button>
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {evidence.map((item, i) => (
+          <EvidenceCard key={item.id} item={item} onClick={() => setSelectedIndex(i)} />
+        ))}
+      </Box>
 
       <EvidenceModal
         evidence={evidence}

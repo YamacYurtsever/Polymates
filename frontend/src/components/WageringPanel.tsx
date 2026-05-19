@@ -184,7 +184,7 @@ export function WageringPanel({ betId, groupId, status, onWager }: Props) {
               variant="outlined"
               onClick={() => setAmount(String(Math.min(n, points ?? n)))}
               disabled={points !== null && n > points}
-              sx={{ flex: 1, minWidth: 0, px: 0.5, fontSize: '0.75rem' }}
+              sx={{ minWidth: 0, width: 36, height: 36, p: 0, fontSize: '0.75rem' }}
             >
               {n}
             </Button>
@@ -194,7 +194,7 @@ export function WageringPanel({ betId, groupId, status, onWager }: Props) {
             variant="outlined"
             onClick={() => points !== null && setAmount(String(points))}
             disabled={points === null || points === 0}
-            sx={{ flex: 1, minWidth: 0, px: 0.5, fontSize: '0.75rem' }}
+            sx={{ minWidth: 0, width: 36, height: 36, p: 0, fontSize: '0.75rem' }}
           >
             Max
           </Button>
