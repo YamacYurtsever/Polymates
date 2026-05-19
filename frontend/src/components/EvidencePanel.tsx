@@ -79,12 +79,14 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
           />
         ) : null}
         <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-          <Typography variant="caption" color="text.secondary" display="block">
-            {item.username}
-          </Typography>
-          <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 1 }}>
-            {relativeTime(item.created_at)}
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="caption" color="text.secondary">
+              {item.username}
+            </Typography>
+            <Typography variant="caption" color="text.disabled">
+              {relativeTime(item.created_at)}
+            </Typography>
+          </Box>
           {item.caption && (
             <Typography
               variant="caption"
