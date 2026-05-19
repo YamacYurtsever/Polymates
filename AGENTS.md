@@ -201,21 +201,21 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 ## M1 — Auth & User Setup
 
 ### Supabase Setup
-- [ ] Create new Supabase project
-- [ ] Enable Email provider in Auth settings
+- [x] Create new Supabase project
+- [x] Enable Email provider in Auth settings
 
 ### Database
-- [ ] Create `users` table with all fields from schema
-- [ ] Create Postgres function `handle_new_user()` that inserts into `users` on signup (no points — points live in `group_members`)
-- [ ] Create trigger `on_auth_user_created` that fires `handle_new_user()` after insert on `auth.users`
-- [ ] Enable RLS on `users` table
-- [ ] Add RLS policy: users can read/update their own row only
+- [x] Create `users` table with all fields from schema
+- [x] Create Postgres function `handle_new_user()` that inserts into `users` on signup (no points — points live in `group_members`)
+- [x] Create trigger `on_auth_user_created` that fires `handle_new_user()` after insert on `auth.users`
+- [x] Enable RLS on `users` table
+- [x] Add RLS policy: users can read/update their own row only
 
 ### Frontend — Project Setup
 - [x] Scaffold project with Vite + React + TypeScript
 - [x] Install and configure MUI
 - [x] Install Supabase JS client
-- [ ] Set up `.env` with Supabase URL and anon key
+- [x] Set up `.env` with Supabase URL and anon key
 - [x] Create Supabase client singleton (`src/lib/supabase.ts`)
 
 ### Frontend — Auth
