@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link as RouterLink } from 'react-router-dom'
-import { Alert, Box, Chip, CircularProgress, Tab, Tabs, Typography } from '@mui/material'
+import { Alert, Box, Chip, Tab, Tabs, Typography } from '@mui/material'
+import { LoadingGavel } from '../components/LoadingGavel'
 import { supabase } from '../lib/supabase'
 import { useCountdownState } from '../hooks/useCountdown'
 import { EvidencePanel } from '../components/EvidencePanel'
@@ -161,9 +162,7 @@ export function BetPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress size={28} />
-      </Box>
+      <LoadingGavel centered size={28} />
     )
   }
 
@@ -304,7 +303,7 @@ export function BetPage() {
             bgcolor: '#fff',
           }}
         >
-          <CircularProgress size={14} thickness={5} sx={{ animationDuration: '2.5s' }} />
+          <LoadingGavel size={18} />
           <Typography variant="body2" color="text.secondary">
             The judge is deliberating…
           </Typography>

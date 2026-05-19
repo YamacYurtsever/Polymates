@@ -4,11 +4,11 @@ import {
   Box,
   Button,
   ButtonBase,
-  CircularProgress,
   TextField,
   Typography,
 } from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
+import { LoadingGavel } from './LoadingGavel'
 import { supabase } from '../lib/supabase'
 import { tokens } from '../theme'
 import type { BetPosition, BetSide } from '../types'
@@ -82,7 +82,7 @@ export function WageringPanel({ betId, groupId, status, onWager }: Props) {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-        <CircularProgress size={20} />
+        <LoadingGavel size={20} />
       </Box>
     )
   }

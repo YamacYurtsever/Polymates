@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,6 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
+import { LoadingGavel } from '../components/LoadingGavel'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { ProbabilityBar } from '../components/ProbabilityBar'
@@ -202,9 +202,7 @@ export function Dashboard() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress size={28} />
-      </Box>
+      <LoadingGavel centered size={28} />
     )
   }
 

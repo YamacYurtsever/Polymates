@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom'
-import { Alert, Box, Button, CircularProgress, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, Stack, Typography } from '@mui/material'
+import { LoadingGavel } from '../components/LoadingGavel'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { tokens } from '../theme'
@@ -115,7 +116,7 @@ export function InvitePage() {
         }}
       >
         {loading ? (
-          <CircularProgress size={24} />
+          <LoadingGavel size={24} />
         ) : error && !group ? (
           <Alert severity="error">{error}</Alert>
         ) : group ? (

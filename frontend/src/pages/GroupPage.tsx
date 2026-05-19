@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -19,6 +18,7 @@ import {
 } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import AddIcon from '@mui/icons-material/Add'
+import { LoadingGavel } from '../components/LoadingGavel'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { ProbabilityBar } from '../components/ProbabilityBar'
@@ -264,9 +264,7 @@ export function GroupPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress size={28} />
-      </Box>
+      <LoadingGavel centered size={28} />
     )
   }
 
