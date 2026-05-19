@@ -341,8 +341,8 @@ export function GroupPage() {
             />
           </DialogContent>
           <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
-            <Button onClick={() => setBetModalOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" disabled={betSubmitting}>
+            <Button onClick={() => setBetModalOpen(false)} sx={{ minWidth: 100 }}>Cancel</Button>
+            <Button type="submit" variant="contained" disabled={betSubmitting} sx={{ minWidth: 100 }}>
               {betSubmitting ? 'Creating…' : 'Create Bet'}
             </Button>
           </DialogActions>

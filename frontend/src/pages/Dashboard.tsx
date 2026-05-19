@@ -157,8 +157,8 @@ export function Dashboard() {
             />
           </DialogContent>
           <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
-            <Button onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" disabled={submitting}>
+            <Button onClick={() => setModalOpen(false)} sx={{ minWidth: 100 }}>Cancel</Button>
+            <Button type="submit" variant="contained" disabled={submitting} sx={{ minWidth: 100 }}>
               {submitting ? 'Creating…' : 'Create Group'}
             </Button>
           </DialogActions>
