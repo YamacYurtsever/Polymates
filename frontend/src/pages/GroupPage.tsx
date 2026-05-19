@@ -118,24 +118,12 @@ function ResolvedBetCard({ bet }: { bet: BetRow }) {
       <Typography sx={{ fontWeight: 550, fontSize: '0.925rem', flexGrow: 1 }}>
         {bet.title}
       </Typography>
-      <Box
-        sx={{
-          px: 1,
-          py: 0.25,
-          borderRadius: 0.75,
-          bgcolor: bet.verdict_outcome
-            ? isYes
-              ? tokens.yesTint
-              : tokens.noTint
-            : tokens.hairline,
-        }}
-      >
-        <Typography
-          sx={{ fontSize: '0.7rem', fontWeight: 650, letterSpacing: '0.08em', color: main }}
-        >
-          {bet.verdict_outcome ? bet.verdict_outcome.toUpperCase() : 'PENDING'}
-        </Typography>
-      </Box>
+      <Chip
+        label={bet.verdict_outcome ? bet.verdict_outcome : 'resolved'}
+        size="small"
+        variant="outlined"
+        sx={{ color: main }}
+      />
     </Box>
   )
 }
@@ -276,7 +264,7 @@ export function GroupPage() {
   const activeBets = bets.filter((b) => b.status === 'open')
   const resolvedBets = bets.filter((b) => b.status === 'closed')
   const myBalance = members.find((m) => m.user_id === user?.id)?.points
-  const sortedLeaderboard = [...members].sort((a, b) => b.points - a.points)
+  const rankedMembers = [...members].sort((a, b) => b.points - a.points)
 
   return (
     <Box sx={{ maxWidth: 960, mx: 'auto' }}>
@@ -348,7 +336,6 @@ export function GroupPage() {
         <Tab label={`Active · ${activeBets.length}`} />
         <Tab label={`Resolved · ${resolvedBets.length}`} />
         <Tab label={`Members · ${members.length}`} />
-        <Tab label="Leaderboard" />
       </Tabs>
 
       {tab === 0 &&
@@ -415,7 +402,7 @@ export function GroupPage() {
             overflow: 'hidden',
           }}
         >
-          {members.map((m, i) => (
+          {rankedMembers.map((m, i) => (
             <Box
               key={m.user_id}
               sx={{
@@ -424,63 +411,7 @@ export function GroupPage() {
                 gap: 1.5,
                 px: 2,
                 py: 1.5,
-                borderBottom: i === members.length - 1 ? 0 : 1,
-                borderColor: 'divider',
-              }}
-            >
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  bgcolor: tokens.hairline,
-                  color: tokens.ink,
-                }}
-              >
-                {m.username[0]?.toUpperCase() ?? '?'}
-              </Avatar>
-              <Typography sx={{ fontWeight: 550, fontSize: '0.95rem', flexGrow: 1 }}>
-                {m.username}
-                {m.user_id === user?.id && (
-                  <Typography
-                    component="span"
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ ml: 0.75 }}
-                  >
-                    (you)
-                  </Typography>
-                )}
-              </Typography>
-              <Typography className="tabular" sx={{ fontWeight: 600, color: tokens.brand }}>
-                {m.points.toLocaleString()} pts
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      )}
-
-      {tab === 3 && (
-        <Box
-          sx={{
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 1.25,
-            bgcolor: '#fff',
-            overflow: 'hidden',
-          }}
-        >
-          {sortedLeaderboard.map((m, i) => (
-            <Box
-              key={m.user_id}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                px: 2,
-                py: 1.5,
-                borderBottom: i === sortedLeaderboard.length - 1 ? 0 : 1,
+                borderBottom: i === rankedMembers.length - 1 ? 0 : 1,
                 borderColor: 'divider',
                 bgcolor: i < 3 ? 'rgba(45,91,255,0.02)' : 'transparent',
               }}
@@ -510,8 +441,18 @@ export function GroupPage() {
               </Avatar>
               <Typography sx={{ fontWeight: 550, fontSize: '0.95rem', flexGrow: 1 }}>
                 {m.username}
+                {m.user_id === user?.id && (
+                  <Typography
+                    component="span"
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ ml: 0.75 }}
+                  >
+                    (you)
+                  </Typography>
+                )}
               </Typography>
-              <Typography className="tabular" sx={{ fontWeight: 650 }}>
+              <Typography className="tabular" sx={{ fontWeight: 650, color: tokens.brand }}>
                 {m.points.toLocaleString()} pts
               </Typography>
             </Box>
