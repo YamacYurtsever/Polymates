@@ -1,17 +1,17 @@
 import { Link as RouterLink, Navigate } from 'react-router-dom'
-import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Stack, Typography } from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
 import { ProbabilityBar } from '../components/ProbabilityBar'
 import { tokens } from '../theme'
 import logo from '../assets/logo.png'
 
 const EXAMPLE_BETS = [
-  { q: 'Will Sarah actually go to the gym this week?', yes: 320, no: 680, pool: 1000, in: '2d 14h' },
-  { q: 'Does Yamac pull an all-nighter before the demo?', yes: 740, no: 260, pool: 1000, in: '4h 32m' },
-  { q: 'Will the group ski trip happen before March?', yes: 410, no: 590, pool: 850, in: '6d' },
+  { q: 'Will Sarah actually go to the gym this week?', yes: 320, no: 680, bettors: 8, in: '2d 14h' },
+  { q: 'Does Yamac pull an all-nighter before the demo?', yes: 740, no: 260, bettors: 5, in: '4h 32m' },
+  { q: 'Will the group ski trip happen before March?', yes: 410, no: 590, bettors: 11, in: '6d' },
 ]
 
-function ExampleCard({ q, yes, no, pool, in: closes }: (typeof EXAMPLE_BETS)[number]) {
+function ExampleCard({ q, yes, no, bettors, in: closes }: (typeof EXAMPLE_BETS)[number]) {
   return (
     <Box
       sx={{
@@ -19,27 +19,40 @@ function ExampleCard({ q, yes, no, pool, in: closes }: (typeof EXAMPLE_BETS)[num
         borderColor: 'divider',
         borderRadius: 1.25,
         bgcolor: '#fff',
-        p: 2.25,
+        p: 2,
         display: 'flex',
         flexDirection: 'column',
-        gap: 1.5,
+        gap: 1.25,
+        height: tokens.betCardHeight,
+        overflow: 'hidden',
         transition: 'border-color 150ms ease-out',
         '&:hover': { borderColor: '#C8C8CD' },
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-        <Chip label="open" size="small" variant="outlined" sx={{ color: tokens.yes }} />
-        <Typography variant="caption" color="text.secondary" className="tabular">
-          closes {closes}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flexGrow: 1 }}>
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: '0.975rem',
+            lineHeight: 1.35,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {q}
         </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="caption" color="text.secondary">
+            {bettors} bettors
+          </Typography>
+          <Typography variant="caption" color="text.secondary" className="tabular">
+            {closes}
+          </Typography>
+        </Box>
       </Box>
-      <Typography sx={{ fontWeight: 600, fontSize: '0.975rem', lineHeight: 1.35, minHeight: 42 }}>
-        {q}
-      </Typography>
       <ProbabilityBar yesTotal={yes} noTotal={no} size="sm" />
-      <Typography variant="caption" color="text.secondary" className="tabular">
-        {pool} pts pool
-      </Typography>
     </Box>
   )
 }
