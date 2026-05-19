@@ -1,13 +1,32 @@
+import { useState } from 'react'
 import { Routes, Route, Navigate, Link as RouterLink } from 'react-router-dom'
-import { Button, AppBar, Toolbar, Typography, Box } from '@mui/material'
+import { AppBar, Toolbar, Typography, Box, Menu, MenuItem, Avatar, IconButton } from '@mui/material'
 import { useAuth } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Login } from './pages/auth/Login'
 import { SignUp } from './pages/auth/SignUp'
-import { Profile } from './pages/Profile'
+import { Dashboard } from './pages/Dashboard'
+import { GroupPage } from './pages/GroupPage'
+import { InvitePage } from './pages/InvitePage'
+
+function AccountMenu() {
+  const { user, signOut } = useAuth()
+  const [anchor, setAnchor] = useState<null | HTMLElement>(null)
+  const initial = (user?.email?.[0] ?? '?').toUpperCase()
+
+  return (
+    <>
+      <IconButton onClick={(e) => setAnchor(e.currentTarget)} size="small">
+        <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>{initial}</Avatar>
+      </IconButton>
+      <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
+        <MenuItem onClick={signOut}>Sign out</MenuItem>
+      </Menu>
+    </>
+  )
+}
 
 function Navbar() {
-  const { signOut } = useAuth()
   return (
     <AppBar
       position="static"
@@ -16,15 +35,15 @@ function Navbar() {
       sx={{ borderBottom: 1, borderColor: 'divider' }}
     >
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700 }}>
+        <Typography
+          variant="h6"
+          component={RouterLink}
+          to="/dashboard"
+          sx={{ flexGrow: 1, fontWeight: 700, textDecoration: 'none', color: 'inherit' }}
+        >
           Polymates
         </Typography>
-        <Button component={RouterLink} to="/profile" size="small">
-          Profile
-        </Button>
-        <Button onClick={signOut} size="small">
-          Sign out
-        </Button>
+        <AccountMenu />
       </Toolbar>
     </AppBar>
   )
@@ -59,7 +78,7 @@ function App() {
         path="/dashboard"
         element={
           <ProtectedLayout>
-            <div>Dashboard</div>
+            <Dashboard />
           </ProtectedLayout>
         }
       />
@@ -67,7 +86,7 @@ function App() {
         path="/groups/:id"
         element={
           <ProtectedLayout>
-            <div>Group</div>
+            <GroupPage />
           </ProtectedLayout>
         }
       />
@@ -87,27 +106,12 @@ function App() {
           </ProtectedLayout>
         }
       />
-      <Route
-        path="/invite/:token"
-        element={
-          <ProtectedLayout>
-            <div>Join Group</div>
-          </ProtectedLayout>
-        }
-      />
+      <Route path="/invite/:token" element={<InvitePage />} />
       <Route
         path="/leaderboard/:groupId"
         element={
           <ProtectedLayout>
             <div>Leaderboard</div>
-          </ProtectedLayout>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedLayout>
-            <Profile />
           </ProtectedLayout>
         }
       />

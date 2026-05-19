@@ -4,9 +4,7 @@
 create table public.users (
   id          uuid primary key references auth.users(id) on delete cascade,
   email       text not null,
-  display_name text,
-  avatar_url  text,
-  created_at  timestamptz not null default now()
+  username    text
 );
 
 -- RLS
@@ -28,12 +26,11 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.users (id, email, display_name, avatar_url)
+  insert into public.users (id, email, username)
   values (
     new.id,
     new.email,
-    new.raw_user_meta_data->>'display_name',
-    new.raw_user_meta_data->>'avatar_url'
+    new.raw_user_meta_data->>'username'
   );
   return new;
 end;
