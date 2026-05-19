@@ -309,7 +309,7 @@ export function GroupPage() {
 
       <Dialog open={betModalOpen} onClose={() => setBetModalOpen(false)} fullWidth maxWidth="sm">
         <Box component="form" onSubmit={handleCreateBet}>
-          <DialogTitle>New Bet</DialogTitle>
+          <DialogTitle sx={{ textAlign: 'center' }}>New Bet</DialogTitle>
           <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             {betError && <Alert severity="error">{betError}</Alert>}
             <TextField
@@ -340,7 +340,7 @@ export function GroupPage() {
               slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: minDatetime() } }}
             />
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
             <Button onClick={() => setBetModalOpen(false)}>Cancel</Button>
             <Button type="submit" variant="contained" disabled={betSubmitting}>
               {betSubmitting ? 'Creating…' : 'Create Bet'}
