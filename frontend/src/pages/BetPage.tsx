@@ -4,6 +4,7 @@ import { Alert, Box, Chip, CircularProgress, Divider, Paper, Typography } from '
 import { supabase } from '../lib/supabase'
 import { useCountdown } from '../hooks/useCountdown'
 import { PositionsBreakdown } from '../components/PositionsBreakdown'
+import { WageringPanel } from '../components/WageringPanel'
 import type { Bet, BetPosition } from '../types'
 
 export function BetPage() {
@@ -83,6 +84,10 @@ export function BetPage() {
     fetchBet()
   }, [id])
 
+  function handleWager(position: BetPosition) {
+    setPositions((prev) => [...prev, position])
+  }
+
   const countdown = useCountdown(bet?.closes_at ?? new Date().toISOString())
 
   if (loading) {
@@ -129,7 +134,7 @@ export function BetPage() {
 
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 3 }}>
         <Typography variant="body2" color="text.secondary">
-          Evidence deadline:
+          Deadline:
         </Typography>
         <Typography variant="body2">{new Date(bet.closes_at).toLocaleString()}</Typography>
         {countdown && bet.status === 'open' && (
@@ -140,17 +145,23 @@ export function BetPage() {
       <Divider sx={{ mb: 3 }} />
 
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+        Place Your Bet
+      </Typography>
+      <WageringPanel
+        betId={bet.id}
+        groupId={bet.group_id}
+        status={bet.status}
+        onWager={handleWager}
+      />
+
+      <Divider sx={{ my: 3 }} />
+
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
         Positions
       </Typography>
       <PositionsBreakdown positions={positions} />
 
       <Divider sx={{ my: 3 }} />
-
-      <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: 'action.hover' }}>
-        <Typography variant="body2" color="text.secondary">
-          Wagering panel — coming in M4
-        </Typography>
-      </Paper>
 
       <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: 'action.hover' }}>
         <Typography variant="body2" color="text.secondary">
