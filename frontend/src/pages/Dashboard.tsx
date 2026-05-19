@@ -8,6 +8,11 @@ import {
   CardActionArea,
   CardContent,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
   Typography,
 } from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
@@ -24,6 +29,10 @@ export function Dashboard() {
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -50,13 +59,37 @@ export function Dashboard() {
     fetchGroups()
   }, [user])
 
+  function openModal() {
+    setName('')
+    setFormError(null)
+    setModalOpen(true)
+  }
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault()
+    setSubmitting(true)
+    setFormError(null)
+
+    const { data: groupId, error } = await supabase.rpc('create_group', { group_name: name })
+
+    if (error) {
+      setFormError(error.message)
+      setSubmitting(false)
+      return
+    }
+
+    setGroups((prev) => [...prev, { id: groupId, name, member_count: 1 }])
+    setModalOpen(false)
+    setSubmitting(false)
+  }
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>
           Your Groups
         </Typography>
-        <Button variant="contained" component={RouterLink} to="/groups/new">
+        <Button variant="contained" onClick={openModal}>
           Create Group
         </Button>
       </Box>
@@ -103,6 +136,34 @@ export function Dashboard() {
           ))}
         </Box>
       )}
+
+      <Dialog open={modalOpen} onClose={() => setModalOpen(false)} fullWidth maxWidth="xs">
+        <Box component="form" onSubmit={handleCreate}>
+          <DialogTitle>New Group</DialogTitle>
+          <DialogContent>
+            {formError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {formError}
+              </Alert>
+            )}
+            <TextField
+              label="Group name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoFocus
+              fullWidth
+              sx={{ mt: 1 }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setModalOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" disabled={submitting}>
+              {submitting ? 'Creating…' : 'Create Group'}
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
     </Box>
   )
 }

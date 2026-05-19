@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link as RouterLink } from 'react-router-dom'
+import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom'
 import {
   Alert,
   Avatar,
   Box,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
   Snackbar,
+  TextField,
   Typography,
 } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
@@ -37,15 +42,25 @@ interface Bet {
   status: 'open' | 'closed'
 }
 
+const minDatetime = () => new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16)
+
 export function GroupPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [group, setGroup] = useState<Group | null>(null)
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [bets, setBets] = useState<Bet[]>([])
+
+  const [betModalOpen, setBetModalOpen] = useState(false)
+  const [betTitle, setBetTitle] = useState('')
+  const [betDescription, setBetDescription] = useState('')
+  const [betClosesAt, setBetClosesAt] = useState('')
+  const [betSubmitting, setBetSubmitting] = useState(false)
+  const [betError, setBetError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -97,6 +112,36 @@ export function GroupPage() {
   async function copyInvite() {
     await navigator.clipboard.writeText(inviteUrl())
     setCopied(true)
+  }
+
+  function openBetModal() {
+    setBetTitle('')
+    setBetDescription('')
+    setBetClosesAt('')
+    setBetError(null)
+    setBetModalOpen(true)
+  }
+
+  async function handleCreateBet(e: React.FormEvent) {
+    e.preventDefault()
+    if (!id) return
+    setBetSubmitting(true)
+    setBetError(null)
+
+    const { data: betId, error } = await supabase.rpc('create_bet', {
+      p_group_id: id,
+      p_title: betTitle,
+      p_description: betDescription,
+      p_closes_at: new Date(betClosesAt).toISOString(),
+    })
+
+    if (error) {
+      setBetError(error.message)
+      setBetSubmitting(false)
+      return
+    }
+
+    navigate(`/bets/${betId}`)
   }
 
   if (loading) {
@@ -179,12 +224,7 @@ export function GroupPage() {
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Active Bets
           </Typography>
-          <Button
-            component={RouterLink}
-            to={`/bets/new?groupId=${group.id}`}
-            variant="contained"
-            size="small"
-          >
+          <Button variant="contained" size="small" onClick={openBetModal}>
             New Bet
           </Button>
         </Box>
@@ -266,6 +306,48 @@ export function GroupPage() {
         onClose={() => setCopied(false)}
         message="Invite link copied!"
       />
+
+      <Dialog open={betModalOpen} onClose={() => setBetModalOpen(false)} fullWidth maxWidth="sm">
+        <Box component="form" onSubmit={handleCreateBet}>
+          <DialogTitle>New Bet</DialogTitle>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            {betError && <Alert severity="error">{betError}</Alert>}
+            <TextField
+              label="The question"
+              value={betTitle}
+              onChange={(e) => setBetTitle(e.target.value)}
+              required
+              autoFocus
+              fullWidth
+              placeholder="Will it rain on Saturday?"
+            />
+            <TextField
+              label="Context and conditions"
+              value={betDescription}
+              onChange={(e) => setBetDescription(e.target.value)}
+              fullWidth
+              multiline
+              rows={3}
+              placeholder="Describe what counts as a win..."
+            />
+            <TextField
+              label="Deadline"
+              type="datetime-local"
+              value={betClosesAt}
+              onChange={(e) => setBetClosesAt(e.target.value)}
+              required
+              fullWidth
+              slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: minDatetime() } }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setBetModalOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" disabled={betSubmitting}>
+              {betSubmitting ? 'Creating…' : 'Create Bet'}
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
     </Box>
   )
 }

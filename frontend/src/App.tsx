@@ -7,8 +7,6 @@ import { SignUp } from './pages/auth/SignUp'
 import { Dashboard } from './pages/Dashboard'
 import { GroupPage } from './pages/GroupPage'
 import { InvitePage } from './pages/InvitePage'
-import { CreateBet } from './pages/CreateBet'
-import { CreateGroup } from './pages/CreateGroup'
 import { BetPage } from './pages/BetPage'
 
 function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -49,22 +47,6 @@ function App() {
         element={
           <ProtectedLayout>
             <GroupPage />
-          </ProtectedLayout>
-        }
-      />
-      <Route
-        path="/groups/new"
-        element={
-          <ProtectedLayout>
-            <CreateGroup />
-          </ProtectedLayout>
-        }
-      />
-      <Route
-        path="/bets/new"
-        element={
-          <ProtectedLayout>
-            <CreateBet />
           </ProtectedLayout>
         }
       />
