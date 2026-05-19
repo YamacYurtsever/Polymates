@@ -75,6 +75,9 @@ export function LiveOddsCard() {
   // mutable runtime state, decoupled from React renders
   const yesValueRef = useRef(bet.yes)
   const pausedRef = useRef(false)
+  const offscreenRef = useRef(false)
+  const rotatingRef = useRef(false)
+  const hoverRef = useRef(false)
   const tickTimerRef = useRef<number | null>(null)
   const rotateTimerRef = useRef<number | null>(null)
 
@@ -97,6 +100,7 @@ export function LiveOddsCard() {
         v: bet.yes,
         duration: 0.9,
         ease: 'power2.out',
+        overwrite: 'auto',
         onUpdate: () => writeBar(initial.v),
       })
 
@@ -175,7 +179,7 @@ export function LiveOddsCard() {
       }
 
       const tick = () => {
-        if (pausedRef.current) return
+        if (pausedRef.current || rotatingRef.current || offscreenRef.current) return
         const current = BETS[currentIdxRef.current]
         const name = pickName(current.names)
         const side: 'YES' | 'NO' = Math.random() < yesValueRef.current / 100 ? 'YES' : 'NO'
@@ -188,6 +192,7 @@ export function LiveOddsCard() {
           v: next,
           duration: 0.8,
           ease: 'power2.out',
+          overwrite: 'auto',
           onUpdate: () => writeBar(proxy.v),
           onComplete: () => {
             yesValueRef.current = next
@@ -201,17 +206,22 @@ export function LiveOddsCard() {
       const currentIdxRef = { current: 0 }
 
       const rotate = () => {
-        if (pausedRef.current) return
+        if (pausedRef.current || rotatingRef.current || offscreenRef.current) return
+        rotatingRef.current = true
         const nextIdx = (currentIdxRef.current + 1) % BETS.length
         const content = contentRef.current
         const feed = feedRef.current
-        if (!content) return
+        if (!content) {
+          rotatingRef.current = false
+          return
+        }
 
         gsap.to([content, feed], {
           opacity: 0,
           y: -6,
           duration: 0.35,
           ease: 'power2.in',
+          overwrite: 'auto',
           onComplete: contextSafe!(() => {
             currentIdxRef.current = nextIdx
             setBetIdx(nextIdx)
@@ -219,40 +229,64 @@ export function LiveOddsCard() {
             yesValueRef.current = nextBet.yes
             writeBar(0)
             if (feed) feed.innerHTML = ''
+            if (badgeLayerRef.current) badgeLayerRef.current.innerHTML = ''
 
             gsap.fromTo(
               [content, feed],
               { opacity: 0, y: 6 },
-              { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+              { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', overwrite: 'auto' },
             )
             const fill = { v: 0 }
             gsap.to(fill, {
               v: nextBet.yes,
               duration: 0.9,
               ease: 'power2.out',
+              overwrite: 'auto',
               onUpdate: () => writeBar(fill.v),
+              onComplete: () => {
+                rotatingRef.current = false
+              },
             })
           }),
         })
       }
 
+      const recomputePaused = () => {
+        pausedRef.current = document.hidden || hoverRef.current || offscreenRef.current
+      }
+
       tickTimerRef.current = window.setInterval(tick, TICK_MS)
       rotateTimerRef.current = window.setInterval(rotate, ROTATE_MS)
 
-      const onVisibility = () => {
-        pausedRef.current = document.hidden
-      }
+      const onVisibility = () => recomputePaused()
       document.addEventListener('visibilitychange', onVisibility)
 
       const onEnter = () => {
-        pausedRef.current = true
+        hoverRef.current = true
+        recomputePaused()
       }
       const onLeave = () => {
-        pausedRef.current = document.hidden
+        hoverRef.current = false
+        recomputePaused()
       }
       const root = rootRef.current
       root?.addEventListener('mouseenter', onEnter)
       root?.addEventListener('mouseleave', onLeave)
+
+      // Pause when scrolled off-screen — the real fix for runaway tweens
+      let observer: IntersectionObserver | null = null
+      if (root && 'IntersectionObserver' in window) {
+        observer = new IntersectionObserver(
+          (entries) => {
+            const entry = entries[0]
+            if (!entry) return
+            offscreenRef.current = !entry.isIntersecting
+            recomputePaused()
+          },
+          { threshold: 0, rootMargin: '100px' },
+        )
+        observer.observe(root)
+      }
 
       return () => {
         if (tickTimerRef.current) window.clearInterval(tickTimerRef.current)
@@ -260,11 +294,12 @@ export function LiveOddsCard() {
         document.removeEventListener('visibilitychange', onVisibility)
         root?.removeEventListener('mouseenter', onEnter)
         root?.removeEventListener('mouseleave', onLeave)
+        observer?.disconnect()
         if (badgeLayerRef.current) badgeLayerRef.current.innerHTML = ''
         if (feedRef.current) feedRef.current.innerHTML = ''
       }
     },
-    { scope: rootRef, dependencies: [reduced] },
+    { scope: rootRef, dependencies: [reduced], revertOnUpdate: true },
   )
 
   // static fallback values for reduced-motion render
