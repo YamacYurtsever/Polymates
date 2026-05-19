@@ -72,7 +72,7 @@ export function VerdictPanel({
               return (
                 <Box
                   key={p.user_id}
-                  sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}
+                  sx={{ display: 'flex', gap: 1 }}
                 >
                   <Typography variant="caption">{p.username}</Typography>
                   <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600 }}>
@@ -99,12 +99,12 @@ export function VerdictPanel({
             losers.map((p) => (
               <Box
                 key={p.user_id}
-                sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}
+                sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}
               >
+                <Typography variant="caption">{p.username}</Typography>
                 <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 600 }}>
                   -{p.amount} pts
                 </Typography>
-                <Typography variant="caption">{p.username}</Typography>
               </Box>
             ))
           )}
