@@ -13,9 +13,10 @@ grant select, update on public.users to authenticated;
 alter table public.users enable row level security;
 
 drop policy if exists "users: read own row" on public.users;
-create policy "users: read own row"
+drop policy if exists "users: read any" on public.users;
+create policy "users: read any"
   on public.users for select
-  using (auth.uid() = id);
+  using (auth.uid() is not null);
 
 drop policy if exists "users: update own row" on public.users;
 create policy "users: update own row"

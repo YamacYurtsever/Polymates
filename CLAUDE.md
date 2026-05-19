@@ -306,33 +306,32 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 ## M4 — Wagering & Points System
 
 ### Database
-- [ ] RLS policy: users can insert their own positions only
-- [ ] RLS policy: users cannot update or delete positions (locked on commit)
-- [ ] Postgres function `place_bet(bet_id, user_id, side, amount)` that atomically:
-  - [ ] Checks user has sufficient points in `group_members` for this bet's group
-  - [ ] Checks bet status is `open`
-  - [ ] Checks user has no existing position on this bet
-  - [ ] Inserts into `bet_positions`
-  - [ ] Deducts points from `group_members` (scoped to bet's group)
-- [ ] Postgres function `resolve_bet(bet_id, outcome)` that:
-  - [ ] Calculates parimutuel payouts
-  - [ ] Distributes points to winners via `group_members` (scoped to bet's group)
-  - [ ] Awards remainder to highest staker on winning side
-  - [ ] Handles zero losing pool (all bets on winning side) — winners get stake back only
-  - [ ] Updates bet status to `closed`
+- [x] RLS policy: users can insert their own positions only
+- [x] RLS policy: users cannot update or delete positions (locked on commit)
+- [x] Postgres function `place_bet(p_bet_id, p_side, p_amount)` that atomically:
+  - [x] Checks user has sufficient points in `group_members` for this bet's group
+  - [x] Checks bet status is `open`
+  - [x] Checks user has no existing position on this bet
+  - [x] Inserts into `bet_positions`
+  - [x] Deducts points from `group_members` (scoped to bet's group)
+- [x] Postgres function `resolve_bet(p_bet_id, p_outcome)` that:
+  - [x] Calculates parimutuel payouts
+  - [x] Distributes points to winners via `group_members` (scoped to bet's group)
+  - [x] Awards remainder to highest staker on winning side
+  - [x] Handles zero losing pool (all bets on winning side) — winners get stake back only
+  - [x] Updates bet status to `closed`
 
 ### Frontend — Bet Page Wagering Panel
-- [ ] Side selector (Yes / No toggle)
-- [ ] Amount input with user's points balance for this group shown
-- [ ] Validation: amount > 0, amount ≤ user's group points, bet still open
-- [ ] Submit button → calls `place_bet` function
-- [ ] Lock UI after position committed (show existing position instead)
-- [ ] Optimistically update positions display after wager
+- [x] Side selector (Yes / No toggle)
+- [x] Amount input with user's points balance for this group shown
+- [x] Validation: amount > 0, amount ≤ user's group points, bet still open
+- [x] Submit button → calls `place_bet` function
+- [x] Lock UI after position committed (show existing position instead)
+- [x] Optimistically update positions display after wager
 
 ### Frontend — Points Display
-- [ ] Show updated group-scoped points balance on bet page and group page after wager
-- [ ] Show per-group points breakdown on profile page
-- [ ] Show each user's stake on the bet page positions breakdown
+- [x] Show updated group-scoped points balance on bet page after wager
+- [x] Show each user's stake on the bet page positions breakdown
 
 ---
 

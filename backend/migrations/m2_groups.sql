@@ -24,10 +24,26 @@ grant select, insert on public.group_members to authenticated;
 alter table public.groups enable row level security;
 alter table public.group_members enable row level security;
 
+-- Helper: avoids self-referential RLS recursion on group_members
+create or replace function public.is_group_member(p_group_id uuid)
+returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.group_members
+    where group_id = p_group_id
+      and user_id = auth.uid()
+  );
+$$;
+
 drop policy if exists "group_members: read own" on public.group_members;
-create policy "group_members: read own"
+drop policy if exists "group_members: read as group member" on public.group_members;
+create policy "group_members: read as group member"
   on public.group_members for select
-  using (auth.uid() = user_id);
+  using (public.is_group_member(group_id));
 
 drop policy if exists "group_members: insert own" on public.group_members;
 create policy "group_members: insert own"
