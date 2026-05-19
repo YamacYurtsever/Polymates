@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Typography,
-} from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Container, Typography } from '@mui/material'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -29,30 +22,29 @@ export function InvitePage() {
 
   useEffect(() => {
     if (!token) return
-    fetchGroup()
-  }, [token])
+    async function fetchGroup() {
+      const { data, error } = await supabase.rpc('get_group_by_invite_token', { token })
 
-  async function fetchGroup() {
-    const { data, error } = await supabase.rpc('get_group_by_invite_token', { token })
+      if (error || !data?.length) {
+        setError('Invite link is invalid or expired.')
+      } else {
+        const g = data[0]
+        setGroup({ id: g.id, name: g.name, member_count: Number(g.member_count) })
 
-    if (error || !data?.length) {
-      setError('Invite link is invalid or expired.')
-    } else {
-      const g = data[0]
-      setGroup({ id: g.id, name: g.name, member_count: Number(g.member_count) })
-
-      if (user) {
-        const { data: existing } = await supabase
-          .from('group_members')
-          .select('user_id')
-          .eq('group_id', g.id)
-          .eq('user_id', user.id)
-          .maybeSingle()
-        if (existing) setAlreadyMember(true)
+        if (user) {
+          const { data: existing } = await supabase
+            .from('group_members')
+            .select('user_id')
+            .eq('group_id', g.id)
+            .eq('user_id', user.id)
+            .maybeSingle()
+          if (existing) setAlreadyMember(true)
+        }
       }
+      setLoading(false)
     }
-    setLoading(false)
-  }
+    fetchGroup()
+  }, [token, user])
 
   async function handleJoin() {
     if (!user || !group) return
@@ -81,9 +73,20 @@ export function InvitePage() {
 
   return (
     <Container maxWidth="xs">
-      <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', textAlign: 'center' }}>
+      <Box
+        sx={{
+          mt: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          alignItems: 'center',
+          textAlign: 'center',
+        }}
+      >
         {error && !group ? (
-          <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
         ) : group ? (
           <>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
@@ -96,17 +99,29 @@ export function InvitePage() {
               {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
             </Typography>
 
-            {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+            {error && (
+              <Alert severity="error" sx={{ width: '100%' }}>
+                {error}
+              </Alert>
+            )}
 
             {alreadyMember ? (
               <>
-                <Typography color="text.secondary">You're already a member of this group.</Typography>
+                <Typography color="text.secondary">
+                  You're already a member of this group.
+                </Typography>
                 <Button variant="contained" onClick={() => navigate(`/groups/${group.id}`)}>
                   Go to Group
                 </Button>
               </>
             ) : (
-              <Button variant="contained" size="large" onClick={handleJoin} disabled={joining} sx={{ mt: 1 }}>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={handleJoin}
+                disabled={joining}
+                sx={{ mt: 1 }}
+              >
                 {joining ? 'Joining…' : 'Accept Invite'}
               </Button>
             )}

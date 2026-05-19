@@ -38,28 +38,28 @@ export function Dashboard() {
 
   useEffect(() => {
     if (!user) return
+    type Row = { groups: { id: string; name: string; group_members: { count: number }[] } | null }
+    async function fetchGroups() {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('group_members')
+        .select('groups(id, name, group_members(count))')
+        .eq('user_id', user!.id)
+
+      if (error) {
+        setError(error.message)
+      } else {
+        const mapped: Group[] = ((data ?? []) as unknown as Row[]).flatMap((row) => {
+          const g = row.groups
+          if (!g) return []
+          return [{ id: g.id, name: g.name, member_count: g.group_members?.[0]?.count ?? 0 }]
+        })
+        setGroups(mapped)
+      }
+      setLoading(false)
+    }
     fetchGroups()
   }, [user])
-
-  async function fetchGroups() {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('group_members')
-      .select('groups(id, name, group_members(count))')
-      .eq('user_id', user!.id)
-
-    if (error) {
-      setError(error.message)
-    } else {
-      const mapped: Group[] = (data ?? []).flatMap((row: any) => {
-        const g = row.groups
-        if (!g) return []
-        return [{ id: g.id, name: g.name, member_count: g.group_members?.[0]?.count ?? 0 }]
-      })
-      setGroups(mapped)
-    }
-    setLoading(false)
-  }
 
   async function handleCreateGroup(e: React.FormEvent) {
     e.preventDefault()
@@ -92,7 +92,11 @@ export function Dashboard() {
         </Button>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
@@ -103,7 +107,13 @@ export function Dashboard() {
           You're not in any groups yet. Create one to get started.
         </Typography>
       ) : (
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 2 }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+            gap: 2,
+          }}
+        >
           {groups.map((g) => (
             <Card key={g.id} variant="outlined">
               <CardActionArea component={RouterLink} to={`/groups/${g.id}`}>
@@ -111,7 +121,11 @@ export function Dashboard() {
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     {g.name}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 0.5, display: 'block' }}
+                  >
                     {g.member_count} {g.member_count === 1 ? 'member' : 'members'}
                   </Typography>
                 </CardContent>
@@ -125,7 +139,11 @@ export function Dashboard() {
         <Box component="form" onSubmit={handleCreateGroup}>
           <DialogTitle>Create Group</DialogTitle>
           <DialogContent sx={{ pt: '8px !important' }}>
-            {createError && <Alert severity="error" sx={{ mb: 2 }}>{createError}</Alert>}
+            {createError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {createError}
+              </Alert>
+            )}
             <TextField
               label="Group name"
               value={groupName}

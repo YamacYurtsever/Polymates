@@ -1,15 +1,6 @@
 import { useState } from 'react'
 import { Routes, Route, Navigate, Link as RouterLink } from 'react-router-dom'
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Box,
-  Menu,
-  MenuItem,
-  Avatar,
-  IconButton,
-} from '@mui/material'
+import { AppBar, Toolbar, Typography, Box, Menu, MenuItem, Avatar, IconButton } from '@mui/material'
 import { useAuth } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Login } from './pages/auth/Login'
