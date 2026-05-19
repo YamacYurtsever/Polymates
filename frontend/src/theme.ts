@@ -206,4 +206,5 @@ export const tokens = {
   yesTint: YES_TINT,
   no: NO,
   noTint: NO_TINT,
+  controlHeightSm: 32,
 }

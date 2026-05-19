@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link as RouterLink } from 'react-router-dom'
-import { Alert, Box, Chip, Tab, Tabs, Typography } from '@mui/material'
+import { Alert, Box, Button, Chip, Snackbar, Tab, Tabs, Typography } from '@mui/material'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { LoadingGavel } from '../components/LoadingGavel'
 import { supabase } from '../lib/supabase'
 import { useCountdownState } from '../hooks/useCountdown'
@@ -21,6 +22,7 @@ export function BetPage() {
   const [error, setError] = useState<string | null>(null)
   const [tab, setTab] = useState(0)
   const tabSetByVerdict = useRef(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -33,6 +35,7 @@ export function BetPage() {
       status: 'open' | 'closed'
       created_at: string
       group_id: string
+      share_token: string
       users: { username: string } | null
       groups: { name: string } | null
     }
@@ -48,7 +51,7 @@ export function BetPage() {
         supabase
           .from('bets')
           .select(
-            'id, title, description, closes_at, status, created_at, group_id, users(username), groups(name)',
+            'id, title, description, closes_at, status, created_at, group_id, share_token, users(username), groups(name)',
           )
           .eq('id', id!)
           .single(),
@@ -73,6 +76,7 @@ export function BetPage() {
           group_id: row.group_id,
           group_name: row.groups?.name ?? 'Group',
           creator_username: row.users?.username ?? 'Unknown',
+          share_token: row.share_token,
         })
       }
 
@@ -178,7 +182,7 @@ export function BetPage() {
   return (
     <Box sx={{ maxWidth: 880, mx: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" color="text.secondary" sx={{ flexGrow: 1 }}>
           <RouterLink
             to={`/groups/${bet.group_id}`}
             style={{ color: 'inherit', textDecoration: 'none', fontWeight: 600 }}
@@ -187,15 +191,26 @@ export function BetPage() {
           </RouterLink>
           {' · '}by {bet.creator_username}
         </Typography>
-        <Box sx={{ flexGrow: 1 }} />
         <Chip
           label={verdict ? 'resolved' : bet.status === 'open' ? 'open' : 'resolving'}
-          size="small"
           variant="outlined"
           sx={{
+            height: tokens.controlHeightSm,
             color: verdict ? tokens.brand : bet.status === 'open' ? tokens.yes : tokens.no,
           }}
         />
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<ContentCopyIcon fontSize="small" />}
+          onClick={() => {
+            navigator.clipboard.writeText(`${window.location.origin}/share/${bet.share_token}`)
+            setCopied(true)
+          }}
+          sx={{ height: tokens.controlHeightSm }}
+        >
+          Copy link
+        </Button>
       </Box>
 
       <Typography
@@ -361,6 +376,13 @@ export function BetPage() {
         <EvidencePanel betId={bet.id} closesAt={bet.closes_at} status={bet.status} />
       )}
 
+      <Snackbar
+        open={copied}
+        autoHideDuration={2000}
+        onClose={() => setCopied(false)}
+        message="Link copied"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Box>
   )
 }

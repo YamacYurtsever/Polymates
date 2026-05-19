@@ -209,9 +209,20 @@ export function Dashboard() {
   return (
     <Box>
       <Box sx={{ mb: 5 }}>
-        <Typography variant="h3" sx={{ mb: 1 }}>
-          Dashboard
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 1 }}>
+          <Typography variant="h3" sx={{ flexGrow: 1 }}>
+            Dashboard
+          </Typography>
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<AddIcon fontSize="small" />}
+            onClick={openModal}
+            sx={{ height: tokens.controlHeightSm, flexShrink: 0 }}
+          >
+            New group
+          </Button>
+        </Box>
         <Typography color="text.secondary">
           {groups.length === 0
             ? 'Create your first group to start placing bets.'
@@ -226,26 +237,9 @@ export function Dashboard() {
       )}
 
       <Box sx={{ mb: 6 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'baseline',
-            justifyContent: 'space-between',
-            mb: 2,
-          }}
-        >
-          <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-            Your groups
-          </Typography>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddIcon fontSize="small" />}
-            onClick={openModal}
-          >
-            New group
-          </Button>
-        </Box>
+        <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 2 }}>
+          Your groups
+        </Typography>
 
         {groups.length === 0 ? (
           <Box
@@ -312,14 +306,7 @@ export function Dashboard() {
 
       {groups.length > 0 && (
         <Box>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'baseline',
-              justifyContent: 'space-between',
-              mb: 2,
-            }}
-          >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
               Active bets
             </Typography>

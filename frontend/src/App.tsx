@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard'
 import { GroupPage } from './pages/GroupPage'
 import { InvitePage } from './pages/InvitePage'
 import { BetPage } from './pages/BetPage'
+import { BetSharePage } from './pages/BetSharePage'
 import { Landing } from './pages/Landing'
 
 function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -62,6 +63,7 @@ function App() {
         }
       />
       <Route path="/invite/:token" element={<InvitePage />} />
+      <Route path="/share/:token" element={<BetSharePage />} />
       <Route
         path="/leaderboard/:groupId"
         element={

@@ -281,13 +281,30 @@ export function GroupPage() {
   return (
     <Box sx={{ maxWidth: 960, mx: 'auto' }}>
       <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2, flexWrap: 'wrap' }}>
           <Typography variant="h3" sx={{ flexGrow: 1 }}>
             {group.name}
           </Typography>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={openBetModal}>
-            New bet
-          </Button>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<ContentCopyIcon fontSize="small" />}
+              onClick={copyInvite}
+              sx={{ height: tokens.controlHeightSm }}
+            >
+              Copy invite
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={openBetModal}
+              sx={{ height: tokens.controlHeightSm }}
+            >
+              New bet
+            </Button>
+          </Box>
         </Box>
         <Box
           sx={{
@@ -311,15 +328,6 @@ export function GroupPage() {
               pts
             </Box>
           )}
-          <Box sx={{ flexGrow: 1 }} />
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<ContentCopyIcon fontSize="small" />}
-            onClick={copyInvite}
-          >
-            Copy invite
-          </Button>
         </Box>
       </Box>
 
@@ -483,7 +491,7 @@ export function GroupPage() {
         open={copied}
         autoHideDuration={2000}
         onClose={() => setCopied(false)}
-        message="Invite link copied"
+        message="Link copied"
       />
 
       <Dialog open={betModalOpen} onClose={() => setBetModalOpen(false)} fullWidth maxWidth="sm">
