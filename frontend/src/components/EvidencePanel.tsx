@@ -236,7 +236,7 @@ export function EvidencePanel({
       {
         id: inserted.id,
         user_id: inserted.user_id,
-        username: 'You',
+        username: (user.user_metadata.username as string | undefined) ?? 'You',
         storage_path: inserted.storage_path,
         caption: inserted.caption,
         created_at: inserted.created_at,
