@@ -3,6 +3,7 @@ import { useParams, Link as RouterLink } from 'react-router-dom'
 import { Alert, Box, Chip, CircularProgress, Divider, Paper, Typography } from '@mui/material'
 import { supabase } from '../lib/supabase'
 import { useCountdown } from '../hooks/useCountdown'
+import { EvidencePanel } from '../components/EvidencePanel'
 import { PositionsBreakdown } from '../components/PositionsBreakdown'
 import { WageringPanel } from '../components/WageringPanel'
 import type { Bet, BetPosition } from '../types'
@@ -165,11 +166,12 @@ export function BetPage() {
 
       <Divider sx={{ my: 3 }} />
 
-      <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: 'action.hover' }}>
-        <Typography variant="body2" color="text.secondary">
-          Evidence panel — coming in M5
-        </Typography>
-      </Paper>
+      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+        Evidence
+      </Typography>
+      <EvidencePanel betId={bet.id} closesAt={bet.closes_at} status={bet.status} />
+
+      <Divider sx={{ my: 3 }} />
 
       <Paper variant="outlined" sx={{ p: 2, bgcolor: 'action.hover' }}>
         <Typography variant="body2" color="text.secondary">
