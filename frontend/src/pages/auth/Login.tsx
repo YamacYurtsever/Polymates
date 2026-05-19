@@ -3,6 +3,7 @@ import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-d
 import { Alert, Box, Button, Link, TextField, Typography } from '@mui/material'
 import { supabase } from '../../lib/supabase'
 import { tokens } from '../../theme'
+import logo from '../../assets/logo.png'
 
 export function Login() {
   const navigate = useNavigate()
@@ -51,12 +52,10 @@ export function Login() {
         }}
       >
         <Box
-          sx={{
-            width: 22,
-            height: 22,
-            borderRadius: '6px',
-            background: `linear-gradient(135deg, ${tokens.brand}, #5B3FFF)`,
-          }}
+          component="img"
+          src={logo}
+          alt="Polymates"
+          sx={{ width: 24, height: 24, objectFit: 'contain' }}
         />
         <Typography sx={{ fontWeight: 650, fontSize: '1.05rem', letterSpacing: '-0.015em' }}>
           Polymates

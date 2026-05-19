@@ -5,7 +5,6 @@ import {
   Avatar,
   Box,
   Button,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -42,6 +41,7 @@ interface BetRow {
   status: 'open' | 'closed'
   yes_total: number
   no_total: number
+  bettor_count: number
   verdict_outcome: 'yes' | 'no' | null
 }
 
@@ -49,6 +49,7 @@ const minDatetime = () => new Date(Date.now() + 60 * 60 * 1000).toISOString().sl
 
 function ActiveBetCard({ bet }: { bet: BetRow }) {
   const countdown = useCountdown(bet.closes_at)
+  const bettors = bet.bettor_count
   return (
     <Box
       component={RouterLink}
@@ -64,39 +65,42 @@ function ActiveBetCard({ bet }: { bet: BetRow }) {
         bgcolor: '#fff',
         textDecoration: 'none',
         color: 'inherit',
+        height: tokens.betCardHeight,
+        overflow: 'hidden',
         transition: 'border-color 150ms ease-out',
         '&:hover': { borderColor: '#C8C8CD' },
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Chip label="open" size="small" variant="outlined" sx={{ color: tokens.yes }} />
-        <Typography variant="caption" color="text.secondary" className="tabular">
-          {countdown ?? 'closing'}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flexGrow: 1 }}>
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: '0.975rem',
+            lineHeight: 1.35,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {bet.title}
         </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="caption" color="text.secondary">
+            {bettors} {bettors === 1 ? 'bettor' : 'bettors'}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" className="tabular">
+            {countdown ?? 'closing'}
+          </Typography>
+        </Box>
       </Box>
-      <Typography
-        sx={{
-          fontWeight: 600,
-          fontSize: '0.975rem',
-          lineHeight: 1.35,
-          minHeight: 42,
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}
-      >
-        {bet.title}
-      </Typography>
       <ProbabilityBar yesTotal={bet.yes_total} noTotal={bet.no_total} size="sm" />
     </Box>
   )
 }
 
 function ResolvedBetCard({ bet }: { bet: BetRow }) {
-  const isYes = bet.verdict_outcome === 'yes'
-  const main = bet.verdict_outcome ? (isYes ? tokens.yes : tokens.no) : tokens.inkSecondary
-  const chipLabel = bet.verdict_outcome ? bet.verdict_outcome.toUpperCase() : 'pending'
+  const bettors = bet.bettor_count
   return (
     <Box
       component={RouterLink}
@@ -112,30 +116,35 @@ function ResolvedBetCard({ bet }: { bet: BetRow }) {
         bgcolor: '#fff',
         textDecoration: 'none',
         color: 'inherit',
+        height: tokens.betCardHeight,
+        overflow: 'hidden',
         transition: 'border-color 150ms ease-out',
         '&:hover': { borderColor: '#C8C8CD' },
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Chip label={chipLabel} size="small" variant="outlined" sx={{ color: main }} />
-        <Typography variant="caption" color="text.secondary">
-          {new Date(bet.closes_at).toLocaleDateString()}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flexGrow: 1 }}>
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: '0.975rem',
+            lineHeight: 1.35,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {bet.title}
         </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="caption" color="text.secondary">
+            {bettors} {bettors === 1 ? 'bettor' : 'bettors'}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {new Date(bet.closes_at).toLocaleDateString()}
+          </Typography>
+        </Box>
       </Box>
-      <Typography
-        sx={{
-          fontWeight: 600,
-          fontSize: '0.975rem',
-          lineHeight: 1.35,
-          minHeight: 42,
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}
-      >
-        {bet.title}
-      </Typography>
       <ProbabilityBar yesTotal={bet.yes_total} noTotal={bet.no_total} size="sm" />
     </Box>
   )
@@ -216,6 +225,7 @@ export function GroupPage() {
           no_total: b.bet_positions
             .filter((p) => p.side === 'no')
             .reduce((s, p) => s + p.amount, 0),
+          bettor_count: b.bet_positions.length,
           verdict_outcome: b.verdicts?.outcome ?? null,
         }))
         setBets(mapped)

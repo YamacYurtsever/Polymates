@@ -3,6 +3,7 @@ import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
 import { ProbabilityBar } from '../components/ProbabilityBar'
 import { tokens } from '../theme'
+import logo from '../assets/logo.png'
 
 const EXAMPLE_BETS = [
   { q: 'Will Sarah actually go to the gym this week?', yes: 320, no: 680, pool: 1000, in: '2d 14h' },
@@ -67,12 +68,10 @@ export function Landing() {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
             <Box
-              sx={{
-                width: 22,
-                height: 22,
-                borderRadius: '6px',
-                background: `linear-gradient(135deg, ${tokens.brand}, #5B3FFF)`,
-              }}
+              component="img"
+              src={logo}
+              alt="Polymates"
+              sx={{ width: 24, height: 24, objectFit: 'contain' }}
             />
             <Typography sx={{ fontWeight: 650, fontSize: '1.05rem', letterSpacing: '-0.015em' }}>
               Polymates

@@ -210,4 +210,5 @@ export const tokens = {
   no: NO,
   noTint: NO_TINT,
   controlHeightSm: 32,
+  betCardHeight: 150,
 }
