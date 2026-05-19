@@ -1,24 +1,24 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link as RouterLink } from 'react-router-dom'
-import { Alert, Box, Chip, CircularProgress, Divider, Paper, Typography } from '@mui/material'
+import { Alert, Box, Chip, CircularProgress, Divider, Typography } from '@mui/material'
 import { supabase } from '../lib/supabase'
 import { useCountdown } from '../hooks/useCountdown'
 import { EvidencePanel } from '../components/EvidencePanel'
 import { PositionsBreakdown } from '../components/PositionsBreakdown'
+import { VerdictPanel } from '../components/VerdictPanel'
 import { WageringPanel } from '../components/WageringPanel'
-import type { Bet, BetPosition } from '../types'
+import type { Bet, BetPosition, Verdict } from '../types'
 
 export function BetPage() {
   const { id } = useParams<{ id: string }>()
   const [bet, setBet] = useState<Bet | null>(null)
   const [positions, setPositions] = useState<BetPosition[]>([])
+  const [verdict, setVerdict] = useState<Verdict | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const fetchedRef = useRef(false)
 
   useEffect(() => {
-    if (!id || fetchedRef.current) return
-    fetchedRef.current = true
+    if (!id) return
 
     type BetRow = {
       id: string
@@ -39,7 +39,7 @@ export function BetPage() {
     }
 
     async function fetchBet() {
-      const [betRes, posRes] = await Promise.all([
+      const [betRes, posRes, verdictRes] = await Promise.all([
         supabase
           .from('bets')
           .select(
@@ -51,6 +51,7 @@ export function BetPage() {
           .from('bet_positions')
           .select('user_id, side, amount, users(username)')
           .eq('bet_id', id!),
+        supabase.from('verdicts').select('outcome, reasoning').eq('bet_id', id!).maybeSingle(),
       ])
 
       if (betRes.error || !betRes.data) {
@@ -81,10 +82,37 @@ export function BetPage() {
         )
       }
 
+      if (!verdictRes.error && verdictRes.data) {
+        setVerdict(verdictRes.data as Verdict)
+      } else if (betRes.data) {
+        const row = betRes.data as unknown as BetRow
+        if (new Date(row.closes_at) < new Date()) {
+          supabase.functions.invoke('resolve-bet', { body: { bet_id: id } })
+        }
+      }
+
       setLoading(false)
     }
 
     fetchBet()
+
+    // Realtime: re-fetch verdict when it's inserted
+    const channel = supabase
+      .channel(`verdict-${id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'verdicts', filter: `bet_id=eq.${id}` },
+        (payload) => {
+          const v = payload.new as { outcome: string; reasoning: string }
+          setVerdict({ outcome: v.outcome as Verdict['outcome'], reasoning: v.reasoning })
+          setBet((prev) => (prev ? { ...prev, status: 'closed' } : prev))
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [id])
 
   function handleWager(position: BetPosition) {
@@ -173,11 +201,21 @@ export function BetPage() {
 
       <Divider sx={{ my: 3 }} />
 
-      <Paper variant="outlined" sx={{ p: 2, bgcolor: 'action.hover' }}>
-        <Typography variant="body2" color="text.secondary">
-          Verdict panel — coming in M6
-        </Typography>
-      </Paper>
+      {verdict ? (
+        <>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            Verdict
+          </Typography>
+          <VerdictPanel verdict={verdict} positions={positions} />
+        </>
+      ) : bet.status === 'closed' || new Date(bet.closes_at) < new Date() ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <CircularProgress size={16} thickness={5} />
+          <Typography variant="body2" color="text.secondary">
+            The judge is deliberating…
+          </Typography>
+        </Box>
+      ) : null}
     </Box>
   )
 }
