@@ -16,6 +16,10 @@ create table if not exists public.group_members (
   primary key (group_id, user_id)
 );
 
+-- Grants
+grant select, insert on public.groups to authenticated;
+grant select, insert on public.group_members to authenticated;
+
 -- RLS
 alter table public.groups enable row level security;
 alter table public.group_members enable row level security;

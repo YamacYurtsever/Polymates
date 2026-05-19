@@ -6,6 +6,9 @@ create table if not exists public.users (
   username    text
 );
 
+-- Grants
+grant select, update on public.users to authenticated;
+
 -- RLS
 alter table public.users enable row level security;
 

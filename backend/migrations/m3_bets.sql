@@ -31,6 +31,10 @@ create table if not exists public.bet_positions (
   unique (bet_id, user_id)
 );
 
+-- Grants
+grant select, insert on public.bets to authenticated;
+grant select, insert on public.bet_positions to authenticated;
+
 -- RLS
 alter table public.bets enable row level security;
 alter table public.bet_positions enable row level security;
