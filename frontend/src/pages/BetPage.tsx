@@ -17,7 +17,7 @@ interface Bet {
   title: string
   description: string
   closes_at: string
-  status: 'open' | 'closed' | 'resolved' | 'refunded'
+  status: 'open' | 'closed'
   created_at: string
   group_id: string
   creator_username: string
@@ -104,7 +104,7 @@ export function BetPage() {
       title: string
       description: string
       closes_at: string
-      status: 'open' | 'closed' | 'resolved' | 'refunded'
+      status: 'open' | 'closed'
       created_at: string
       group_id: string
       users: { username: string } | null
@@ -180,9 +180,7 @@ export function BetPage() {
 
   const statusColor: Record<string, 'default' | 'success' | 'warning' | 'error'> = {
     open: 'success',
-    closed: 'warning',
-    resolved: 'default',
-    refunded: 'error',
+    closed: 'default',
   }
 
   return (

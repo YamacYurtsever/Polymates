@@ -34,7 +34,7 @@ interface Bet {
   id: string
   title: string
   closes_at: string
-  status: 'open' | 'closed' | 'resolved' | 'refunded'
+  status: 'open' | 'closed'
 }
 
 export function GroupPage() {
@@ -188,13 +188,13 @@ export function GroupPage() {
             New Bet
           </Button>
         </Box>
-        {bets.filter((b) => b.status === 'open' || b.status === 'closed').length === 0 ? (
+        {bets.filter((b) => b.status === 'open').length === 0 ? (
           <Typography color="text.secondary" variant="body2">
             No active bets yet.
           </Typography>
         ) : (
           bets
-            .filter((b) => b.status === 'open' || b.status === 'closed')
+            .filter((b) => b.status === 'open')
             .map((b) => (
               <Box
                 key={b.id}
@@ -226,13 +226,13 @@ export function GroupPage() {
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
           Resolved Bets
         </Typography>
-        {bets.filter((b) => b.status === 'resolved' || b.status === 'refunded').length === 0 ? (
+        {bets.filter((b) => b.status === 'closed').length === 0 ? (
           <Typography color="text.secondary" variant="body2">
             No resolved bets yet.
           </Typography>
         ) : (
           bets
-            .filter((b) => b.status === 'resolved' || b.status === 'refunded')
+            .filter((b) => b.status === 'closed')
             .map((b) => (
               <Box
                 key={b.id}

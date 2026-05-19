@@ -74,7 +74,7 @@ Polymates is a social betting app for friend groups. Members create binary (Yes/
 | title | text | The question |
 | description | text | Context and conditions |
 | closes_at | timestamptz | Evidence submission deadline |
-| status | enum: open\|closed\|resolved\|refunded | |
+| status | enum: open\|closed | |
 | created_at | timestamptz | |
 
 ### `bet_positions`
@@ -116,7 +116,7 @@ remainder = losing_pool - sum of all payouts (rounding)
 ```
 
 **Edge cases:**
-- All bets on the same side → refund everyone, mark as `refunded`
+- All bets on the same side → `losing_pool = 0`, winners receive their stake back only (no redistribution)
 - No evidence submitted → arbiter rules on title + description alone, reasoning states this explicitly
 
 ---
@@ -303,8 +303,8 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
   - [ ] Calculates parimutuel payouts
   - [ ] Distributes points to winners via `group_members` (scoped to bet's group)
   - [ ] Awards remainder to highest staker on winning side
-  - [ ] Handles zero winners edge case (refund everyone)
-  - [ ] Updates bet status to `resolved` or `refunded`
+  - [ ] Handles zero losing pool (all bets on winning side) — winners get stake back only
+  - [ ] Updates bet status to `closed`
 
 ### Frontend — Bet Page Wagering Panel
 - [ ] Side selector (Yes / No toggle)

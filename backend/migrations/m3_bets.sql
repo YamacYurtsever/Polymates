@@ -1,6 +1,6 @@
 -- M3: Bets & Positions
 
-create type public.bet_status as enum ('open', 'closed', 'resolved', 'refunded');
+create type public.bet_status as enum ('open', 'closed');
 create type public.bet_side as enum ('yes', 'no');
 
 create table public.bets (
