@@ -5,6 +5,8 @@ import {
   Button,
   Card,
   CardContent,
+  Dialog,
+  DialogContent,
   Divider,
   LinearProgress,
   TextField,
@@ -34,6 +36,7 @@ function isImage(path: string) {
 
 function EvidenceCard({ item }: { item: EvidenceItem }) {
   const [url, setUrl] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -48,19 +51,14 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
   const filename = item.storage_path.split('/').pop() ?? 'file'
 
   return (
-    <Card variant="outlined" sx={{ width: 160, flexShrink: 0 }}>
-      {url && isImage(item.storage_path) ? (
-        <Box
-          component="a"
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          sx={{ display: 'block' }}
-        >
+    <>
+      <Card variant="outlined" sx={{ width: 160, flexShrink: 0 }}>
+        {url && isImage(item.storage_path) ? (
           <Box
             component="img"
             src={url}
             alt={item.caption ?? filename}
+            onClick={() => setOpen(true)}
             sx={{
               width: '100%',
               height: 120,
@@ -71,41 +69,59 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
               '&:hover': { opacity: 0.85 },
             }}
           />
-        </Box>
-      ) : null}
-      <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-        <Typography variant="caption" color="text.secondary" display="block">
-          {item.username}
-        </Typography>
-        {item.caption && (
-          <Typography
-            variant="caption"
-            sx={{
-              mt: 0.25,
-              display: 'block',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {item.caption}
+        ) : null}
+        <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+          <Typography variant="caption" color="text.secondary" display="block">
+            {item.username}
           </Typography>
-        )}
-        {url && !isImage(item.storage_path) && (
-          <Button
-            component="a"
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            size="small"
-            variant="outlined"
-            sx={{ mt: 0.5 }}
-          >
-            {filename}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+          {item.caption && (
+            <Typography
+              variant="caption"
+              sx={{
+                mt: 0.25,
+                display: 'block',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {item.caption}
+            </Typography>
+          )}
+          {url && !isImage(item.storage_path) && (
+            <Button
+              component="a"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="small"
+              variant="outlined"
+              sx={{ mt: 0.5 }}
+            >
+              {filename}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
+      {url && isImage(item.storage_path) && (
+        <Dialog open={open} onClose={() => setOpen(false)} maxWidth="lg">
+          <DialogContent sx={{ p: 0 }}>
+            <Box
+              component="img"
+              src={url}
+              alt={item.caption ?? filename}
+              sx={{ display: 'block', maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain' }}
+            />
+            {item.caption && (
+              <Typography variant="body2" sx={{ p: 2 }}>
+                {item.caption}
+              </Typography>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   )
 }
 
