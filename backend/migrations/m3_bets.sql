@@ -62,3 +62,33 @@ create policy "bet_positions: read as group member"
         and group_members.user_id = auth.uid()
     )
   );
+
+-- RPC: create a bet (avoids client-side auth.uid() JWT issues, same pattern as create_group)
+create or replace function public.create_bet(
+  p_group_id    uuid,
+  p_title       text,
+  p_description text,
+  p_closes_at   timestamptz
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_bet_id uuid;
+begin
+  if not exists (
+    select 1 from group_members
+    where group_id = p_group_id and user_id = auth.uid()
+  ) then
+    raise exception 'not a member of this group';
+  end if;
+
+  insert into public.bets (group_id, creator_id, title, description, closes_at)
+  values (p_group_id, auth.uid(), p_title, p_description, p_closes_at)
+  returning id into new_bet_id;
+
+  return new_bet_id;
+end;
+$$;
