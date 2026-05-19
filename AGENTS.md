@@ -422,3 +422,38 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 - [x] Copy-to-clipboard button that copies `/share/[share_token]` URL
 - [x] Brief "Copied!" confirmation toast
 
+
+---
+
+## M8 — Bet Comments
+
+### Concept
+A live comment thread on each bet page, visible to all group members. Renders as a third tab ("Comments · N") alongside Positions and Evidence.
+
+### Data Model
+
+#### `comments`
+| Field | Type | Notes |
+|---|---|---|
+| id | uuid PK | |
+| bet_id | uuid FK → bets | |
+| user_id | uuid FK → users | |
+| body | text | Max 500 chars |
+| created_at | timestamptz | |
+
+### Database — `backend/migrations/m8_comments.sql`
+- [ ] Create `comments` table with all fields above
+- [ ] `grant select, insert on public.comments to authenticated`
+- [ ] Enable RLS on `comments`
+- [ ] RLS policy: users can read comments for bets in groups they belong to
+- [ ] RLS policy: users can insert their own comments (`auth.uid() = user_id`) only on bets in groups they belong to
+- [ ] RLS policy: no update or delete (comments are permanent)
+
+### Frontend — Comments Tab (on `/bets/[id]`)
+- [ ] Add "Comments · N" as third tab on the bet page
+- [ ] `CommentsPanel` component — fetches all comments for the bet on mount, ordered by `created_at` asc
+- [ ] Each comment shows avatar initial, username, relative timestamp, and body
+- [ ] Input box at the bottom to submit a new comment (disabled if bet is not accessible)
+- [ ] Submit inserts directly via Supabase client; optimistically appends to the list
+- [ ] Supabase realtime subscription on `comments` INSERT for `bet_id=eq.<id>` — new comments from other users appear live
+- [ ] Tab count updates live as comments arrive
