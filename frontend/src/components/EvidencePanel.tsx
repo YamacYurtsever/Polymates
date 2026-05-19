@@ -125,17 +125,12 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
               }}
             />
           )}
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {item.username}
-          </Typography>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            display="block"
-            sx={{ mb: item.caption ? 1 : 0 }}
-          >
-            {relativeTime(item.created_at)}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: item.caption ? 1 : 0 }}>
+            <Typography variant="body2">{item.username}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {relativeTime(item.created_at)}
+            </Typography>
+          </Box>
           {item.caption && <Typography variant="body2">{item.caption}</Typography>}
           {url && !isImage(item.storage_path) && (
             <Button
