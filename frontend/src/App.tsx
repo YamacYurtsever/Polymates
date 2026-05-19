@@ -9,6 +9,7 @@ import { Dashboard } from './pages/Dashboard'
 import { GroupPage } from './pages/GroupPage'
 import { InvitePage } from './pages/InvitePage'
 import { CreateBet } from './pages/CreateBet'
+import { CreateGroup } from './pages/CreateGroup'
 import { BetPage } from './pages/BetPage'
 
 function AccountMenu() {
@@ -89,6 +90,14 @@ function App() {
         element={
           <ProtectedLayout>
             <GroupPage />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/groups/new"
+        element={
+          <ProtectedLayout>
+            <CreateGroup />
           </ProtectedLayout>
         }
       />

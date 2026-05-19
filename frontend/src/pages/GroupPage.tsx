@@ -112,7 +112,7 @@ export function GroupPage() {
   }
 
   return (
-    <Box sx={{ maxWidth: 720 }}>
+    <Box sx={{ maxWidth: 720, mx: 'auto' }}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>
           {group.name}

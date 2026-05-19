@@ -67,7 +67,7 @@ export function CreateBet() {
   }
 
   return (
-    <Box sx={{ maxWidth: 600 }}>
+    <Box sx={{ maxWidth: 600, mx: 'auto' }}>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
         New Bet
       </Typography>

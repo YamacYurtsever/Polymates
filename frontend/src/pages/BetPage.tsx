@@ -184,7 +184,7 @@ export function BetPage() {
   }
 
   return (
-    <Box sx={{ maxWidth: 720 }}>
+    <Box sx={{ maxWidth: 720, mx: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
         <Chip label={bet.status.toUpperCase()} color={statusColor[bet.status]} size="small" />
         <Typography variant="caption" color="text.secondary">
