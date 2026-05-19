@@ -255,35 +255,36 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 ## M3 — Bet Creation & Bet Page
 
 ### Database
-- [ ] Create `bets` table with all fields from schema
-- [ ] Create `bet_positions` table with all fields from schema
-- [ ] Enable RLS on `bets` table
-- [ ] Enable RLS on `bet_positions` table
-- [ ] RLS policy: users can only read bets belonging to groups they are a member of
-- [ ] RLS policy: users can only create bets in groups they are a member of
-- [ ] RLS policy: users can only read positions for bets they have access to
+- [x] Create `bets` table with all fields from schema
+- [x] Create `bet_positions` table with all fields from schema
+- [x] Enable RLS on `bets` table
+- [x] Enable RLS on `bet_positions` table
+- [x] RLS policy: users can only read bets belonging to groups they are a member of
+- [x] RLS policy: users can only create bets in groups they are a member of
+- [x] RLS policy: users can only read positions for bets they have access to
+- [x] RPC `create_bet(p_group_id, p_title, p_description, p_closes_at)` — security definer, validates group membership, avoids client-side auth.uid() issues
 
 ### Frontend — Create Bet (`/bets/new`)
-- [ ] Title input (the question)
-- [ ] Description input (context and conditions)
-- [ ] Closing datetime picker
-- [ ] Group selector (from user's groups)
-- [ ] Submit → insert into `bets` with status `open`
-- [ ] Redirect to `/bets/[id]` on success
+- [x] Title input (the question)
+- [x] Description input (context and conditions)
+- [x] Closing datetime picker
+- [x] Group selector (from user's groups)
+- [x] Submit → calls `create_bet` RPC
+- [x] Redirect to `/bets/[id]` on success
 
 ### Frontend — Bet Page (`/bets/[id]`)
-- [ ] Bet title and description
-- [ ] Created by and closing time display
-- [ ] Countdown timer to `closes_at` (updates every second)
-- [ ] Positions breakdown: Yes vs No, total points staked on each side, number of bettors
-- [ ] Placeholder for wagering panel (M4)
-- [ ] Placeholder for evidence panel (M5)
-- [ ] Placeholder for verdict panel (M6)
+- [x] Bet title and description
+- [x] Created by and closing time display
+- [x] Countdown timer to `closes_at` (updates every second)
+- [x] Positions breakdown: Yes vs No, total points staked on each side, number of bettors
+- [x] Placeholder for wagering panel (M4)
+- [x] Placeholder for evidence panel (M5)
+- [x] Placeholder for verdict panel (M6)
 
 ### Frontend — Group Page Update
-- [ ] Active bets list on `/groups/[id]` (status `open`)
-- [ ] Resolved bets list on `/groups/[id]` (status `resolved`)
-- [ ] Create new bet button linking to `/bets/new?groupId=[id]`
+- [x] Active bets list on `/groups/[id]` (status `open` or `closed`)
+- [x] Resolved bets list on `/groups/[id]` (status `resolved` or `refunded`)
+- [x] Create new bet button linking to `/bets/new?groupId=[id]`
 
 ---
 
