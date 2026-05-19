@@ -28,6 +28,7 @@ export function BetPage() {
       created_at: string
       group_id: string
       users: { username: string } | null
+      groups: { name: string } | null
     }
     type PositionRow = {
       user_id: string
@@ -41,7 +42,7 @@ export function BetPage() {
         supabase
           .from('bets')
           .select(
-            'id, title, description, closes_at, status, created_at, group_id, users(username)',
+            'id, title, description, closes_at, status, created_at, group_id, users(username), groups(name)',
           )
           .eq('id', id!)
           .single(),
@@ -63,6 +64,7 @@ export function BetPage() {
           status: row.status,
           created_at: row.created_at,
           group_id: row.group_id,
+          group_name: row.groups?.name ?? 'Group',
           creator_username: row.users?.username ?? 'Unknown',
         })
       }
@@ -117,7 +119,7 @@ export function BetPage() {
             to={`/groups/${bet.group_id}`}
             style={{ color: 'inherit', textDecoration: 'underline' }}
           >
-            group
+            {bet.group_name}
           </RouterLink>
         </Typography>
       </Box>

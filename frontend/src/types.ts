@@ -9,6 +9,7 @@ export interface Bet {
   status: BetStatus
   created_at: string
   group_id: string
+  group_name: string
   creator_username: string
 }
 
