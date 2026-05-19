@@ -338,31 +338,32 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 ## M5 — Evidence Submission
 
 ### Supabase Storage
-- [ ] Create storage bucket `evidence` (private, not public)
-- [ ] Storage policy: authenticated users can upload to their own folder (`user_id/bet_id/filename`)
-- [ ] Storage policy: users can read evidence for bets in their groups only
+- [x] Create storage bucket `evidence` (private, not public)
+- [x] Storage policy: authenticated users can upload to their own folder (`user_id/bet_id/filename`)
+- [x] Storage policy: users can read evidence for bets in their groups only
 
 ### Database
-- [ ] Create `evidence` table with all fields from schema
-- [ ] Enable RLS on `evidence` table
-- [ ] RLS policy: users can insert their own evidence only
-- [ ] RLS policy: users can read evidence for bets they have access to
-- [ ] RLS policy: evidence submission blocked if `bet.closes_at` has passed (check in insert policy)
+- [x] Create `evidence` table with all fields from schema
+- [x] Enable RLS on `evidence` table
+- [x] RLS policy: users can insert their own evidence only
+- [x] RLS policy: users can read evidence for bets they have access to
+- [x] RLS policy: evidence submission blocked if `bet.closes_at` has passed (check in insert policy)
 
 ### Frontend — Evidence Submission Panel (on `/bets/[id]`)
-- [ ] File upload input (images, PDFs)
-- [ ] Caption text input
-- [ ] Submit button → upload file to Supabase Storage, insert into `evidence` table
-- [ ] Disable submission panel when countdown reaches zero
-- [ ] Show upload progress indicator
-- [ ] Error handling for oversized files or wrong file types
+- [x] File upload input (images, PDFs)
+- [x] Caption text input (80 char limit)
+- [x] Submit button → upload file to Supabase Storage, insert into `evidence` table
+- [x] Disable submission panel when countdown reaches zero or bet is closed
+- [x] Show upload progress indicator (compression + upload)
+- [x] Error handling for oversized files or wrong file types
+- [x] Client-side image compression before upload (max 1MB / 1920px)
 
 ### Frontend — Evidence Gallery (on `/bets/[id]`)
-- [ ] List all submitted evidence for the bet
-- [ ] Show submitter display name and caption
-- [ ] Render image previews inline
-- [ ] PDF shows as a download link with filename
-- [ ] Visible to all group members regardless of which side they bet on
+- [x] Fixed-size card grid with thumbnail previews
+- [x] Show submitter username, relative timestamp, and caption
+- [x] Click card to open full-size modal
+- [x] PDF shows as download link in modal
+- [x] Visible to all group members regardless of which side they bet on
 
 ---
 
