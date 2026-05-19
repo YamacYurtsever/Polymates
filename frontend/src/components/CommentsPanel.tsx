@@ -141,7 +141,7 @@ export function CommentsPanel({ betId, onCountChange }: { betId: string; onCount
             maxRows={4}
             fullWidth
             size="small"
-            inputProps={{ maxLength: 500 }}
+            slotProps={{ htmlInput: { maxLength: 500 } }}
           />
           <Button
             type="submit"
