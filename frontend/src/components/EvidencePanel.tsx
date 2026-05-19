@@ -60,36 +60,36 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
 
   return (
     <>
-      <Card variant="outlined" sx={{ width: 160, flexShrink: 0 }}>
+      <Card
+        variant="outlined"
+        onClick={() => setOpen(true)}
+        sx={{
+          width: 160,
+          flexShrink: 0,
+          cursor: 'pointer',
+          '&:hover': { borderColor: 'text.secondary' },
+        }}
+      >
         {url && isImage(item.storage_path) ? (
           <Box
             component="img"
             src={url}
             alt={item.caption ?? filename}
-            onClick={() => setOpen(true)}
-            sx={{
-              width: '100%',
-              height: 120,
-              objectFit: 'cover',
-              display: 'block',
-              cursor: 'pointer',
-              transition: 'opacity 0.15s',
-              '&:hover': { opacity: 0.85 },
-            }}
+            sx={{ width: '100%', height: 120, objectFit: 'cover', display: 'block' }}
           />
         ) : null}
         <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
           <Typography variant="caption" color="text.secondary" display="block">
             {item.username}
           </Typography>
-          <Typography variant="caption" color="text.disabled" display="block">
+          <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.25 }}>
             {relativeTime(item.created_at)}
           </Typography>
           {item.caption && (
             <Typography
               variant="caption"
               sx={{
-                mt: 0.25,
+                mt: 0.5,
                 display: 'block',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -100,6 +100,42 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
             </Typography>
           )}
           {url && !isImage(item.storage_path) && (
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+              PDF
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="lg">
+        <DialogContent>
+          {url && isImage(item.storage_path) && (
+            <Box
+              component="img"
+              src={url}
+              alt={item.caption ?? filename}
+              sx={{
+                display: 'block',
+                maxWidth: '85vw',
+                maxHeight: '70vh',
+                objectFit: 'contain',
+                mb: 2,
+              }}
+            />
+          )}
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {item.username}
+          </Typography>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            display="block"
+            sx={{ mb: item.caption ? 1 : 0 }}
+          >
+            {relativeTime(item.created_at)}
+          </Typography>
+          {item.caption && <Typography variant="body2">{item.caption}</Typography>}
+          {url && !isImage(item.storage_path) && (
             <Button
               component="a"
               href={url}
@@ -107,31 +143,13 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
               rel="noopener noreferrer"
               size="small"
               variant="outlined"
-              sx={{ mt: 0.5 }}
+              sx={{ mt: 1 }}
             >
               {filename}
             </Button>
           )}
-        </CardContent>
-      </Card>
-
-      {url && isImage(item.storage_path) && (
-        <Dialog open={open} onClose={() => setOpen(false)} maxWidth="lg">
-          <DialogContent sx={{ p: 0 }}>
-            <Box
-              component="img"
-              src={url}
-              alt={item.caption ?? filename}
-              sx={{ display: 'block', maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain' }}
-            />
-            {item.caption && (
-              <Typography variant="body2" sx={{ p: 2 }}>
-                {item.caption}
-              </Typography>
-            )}
-          </DialogContent>
-        </Dialog>
-      )}
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
