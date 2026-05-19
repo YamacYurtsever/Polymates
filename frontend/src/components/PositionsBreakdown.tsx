@@ -22,7 +22,11 @@ function SideList({
       {positions.map((p) => (
         <Box
           key={p.user_id}
-          sx={{ display: 'flex', gap: 0.5, justifyContent: align === 'right' ? 'flex-end' : 'flex-start' }}
+          sx={{
+            display: 'flex',
+            gap: 0.5,
+            justifyContent: align === 'right' ? 'flex-end' : 'flex-start',
+          }}
         >
           <Typography variant="caption">{p.username}</Typography>
           <Typography variant="caption" sx={{ fontWeight: 600, color }}>
@@ -62,7 +66,11 @@ export function PositionsBreakdown({ positions }: { positions: BetPosition[] }) 
           '& .MuiLinearProgress-bar': { bgcolor: 'success.main' },
         }}
       />
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, mb: 2, display: 'block' }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ mt: 0.5, mb: 2, display: 'block' }}
+      >
         {total} pts total at stake
       </Typography>
 
