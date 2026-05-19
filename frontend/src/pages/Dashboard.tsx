@@ -1,19 +1,14 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardActionArea,
   CardContent,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
   Typography,
-  Alert,
 } from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -26,15 +21,9 @@ interface Group {
 
 export function Dashboard() {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [groupName, setGroupName] = useState('')
-  const [creating, setCreating] = useState(false)
-  const [createError, setCreateError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -61,33 +50,13 @@ export function Dashboard() {
     fetchGroups()
   }, [user])
 
-  async function handleCreateGroup(e: React.FormEvent) {
-    e.preventDefault()
-    if (!user) return
-    setCreating(true)
-    setCreateError(null)
-
-    const { data: groupId, error } = await supabase.rpc('create_group', { group_name: groupName })
-
-    if (error) {
-      setCreateError(error.message)
-      setCreating(false)
-      return
-    }
-
-    setDialogOpen(false)
-    setGroupName('')
-    setCreating(false)
-    navigate(`/groups/${groupId}`)
-  }
-
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>
           Your Groups
         </Typography>
-        <Button variant="contained" onClick={() => setDialogOpen(true)}>
+        <Button variant="contained" component={RouterLink} to="/groups/new">
           Create Group
         </Button>
       </Box>
@@ -134,33 +103,6 @@ export function Dashboard() {
           ))}
         </Box>
       )}
-
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="xs">
-        <Box component="form" onSubmit={handleCreateGroup}>
-          <DialogTitle>Create Group</DialogTitle>
-          <DialogContent sx={{ pt: '8px !important' }}>
-            {createError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {createError}
-              </Alert>
-            )}
-            <TextField
-              label="Group name"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              required
-              autoFocus
-              fullWidth
-            />
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" disabled={creating}>
-              {creating ? 'Creating…' : 'Create'}
-            </Button>
-          </DialogActions>
-        </Box>
-      </Dialog>
     </Box>
   )
 }

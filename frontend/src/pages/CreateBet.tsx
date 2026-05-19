@@ -67,7 +67,7 @@ export function CreateBet() {
   }
 
   return (
-    <Box sx={{ maxWidth: 600 }}>
+    <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
         New Bet
       </Typography>
@@ -117,7 +117,7 @@ export function CreateBet() {
           fullWidth
           slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: minDatetime } }}
         />
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
           <Button onClick={() => navigate(-1)}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={submitting || !groupId}>
             {submitting ? 'Creating…' : 'Create Bet'}
