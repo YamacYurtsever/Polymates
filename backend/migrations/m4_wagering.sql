@@ -95,6 +95,16 @@ begin
   from bet_positions
   where bet_id = p_bet_id;
 
+  -- no one bet the winning side: return all stakes to everyone
+  if v_winning_pool = 0 then
+    for r in select user_id, amount from bet_positions where bet_id = p_bet_id loop
+      update group_members set points = points + r.amount
+      where group_id = v_group_id and user_id = r.user_id;
+    end loop;
+    update bets set status = 'closed' where id = p_bet_id;
+    return;
+  end if;
+
   -- distribute stake + share of losing pool to each winner (highest staker first)
   for r in
     select user_id, amount

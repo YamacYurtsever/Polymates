@@ -28,7 +28,9 @@ export function VerdictPanel({
   const winners = positions.filter((p) => p.side === verdict.outcome)
   const losers = positions.filter((p) => p.side !== verdict.outcome)
   const losingTotal = losers.reduce((s, p) => s + p.amount, 0)
-  const zeroPool = losingTotal === 0
+  const zeroPool = losingTotal === 0       // everyone bet the winning side
+  const zeroWinners = winners.length === 0 // everyone bet the losing side
+  const stakesReturned = zeroPool || zeroWinners
 
   return (
     <Box
@@ -107,7 +109,7 @@ export function VerdictPanel({
               </Typography>
             ) : (
               winners.map((p) => {
-                const winnings = zeroPool ? 0 : payout(p.amount, verdict.outcome, positions)
+                const winnings = stakesReturned ? 0 : payout(p.amount, verdict.outcome, positions)
                 return (
                   <Box
                     key={p.user_id}
@@ -191,9 +193,9 @@ export function VerdictPanel({
                   <Typography sx={{ fontSize: '0.875rem' }}>{p.username}</Typography>
                   <Typography
                     className="tabular"
-                    sx={{ color: tokens.no, fontWeight: 650, fontSize: '0.875rem' }}
+                    sx={{ color: zeroWinners ? tokens.yes : tokens.no, fontWeight: 650, fontSize: '0.875rem' }}
                   >
-                    −{p.amount}
+                    {zeroWinners ? `+${p.amount}` : `−${p.amount}`}
                   </Typography>
                 </Box>
               ))
@@ -201,7 +203,7 @@ export function VerdictPanel({
           </Box>
         </Box>
 
-        {zeroPool && winners.length > 0 && (
+        {stakesReturned && (
           <Typography
             variant="caption"
             color="text.secondary"
