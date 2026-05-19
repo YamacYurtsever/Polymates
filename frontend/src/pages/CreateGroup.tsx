@@ -44,7 +44,7 @@ export function CreateGroup() {
           autoFocus
           fullWidth
         />
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
           <Button onClick={() => navigate('/dashboard')}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={submitting}>
             {submitting ? 'Creating…' : 'Create Group'}
