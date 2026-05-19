@@ -4,6 +4,21 @@
 
 ---
 
+## Supabase Migration Checklist
+
+Every migration that creates a table **must** include all three:
+
+1. **`GRANT`** — RLS and grants are orthogonal. Without it, `authenticated` has zero table access regardless of policies.
+   ```sql
+   grant select, insert on public.<table> to authenticated;
+   ```
+2. **RLS enabled** — `alter table public.<table> enable row level security;`
+3. **Policies** — Use `drop policy if exists` before each `create policy` for idempotency.
+
+**INSERT policies that check `auth.uid()`** — always use a `security definer` RPC instead of direct client inserts. `auth.uid()` can be NULL client-side, causing silent RLS failures. Established pattern: `create_group`, `create_bet`.
+
+---
+
 ## Concept
 
 Polymates is a social betting app for friend groups. Members create binary (Yes/No) bets, stake virtual points, submit evidence before the deadline, and an AI arbiter delivers a humorous verdict. The UI and tone are themed around a courtroom.
