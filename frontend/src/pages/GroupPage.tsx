@@ -280,37 +280,33 @@ export function GroupPage() {
 
   return (
     <Box sx={{ maxWidth: 960, mx: 'auto' }}>
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-          <Typography variant="h3" sx={{ flexGrow: 1 }}>
-            {group.name}
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={<ContentCopyIcon fontSize="small" />}
-              onClick={copyInvite}
-              sx={{ height: tokens.controlHeightSm }}
-            >
-              Copy invite
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={openBetModal}
-              sx={{ height: tokens.controlHeightSm }}
-            >
-              New bet
-            </Button>
-          </Box>
+      <Box sx={{ mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+          <Typography variant="h3" sx={{ flexGrow: 1 }}>{group.name}</Typography>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={openBetModal}
+            sx={{ height: tokens.controlHeightSm }}
+          >
+            New bet
+          </Button>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<ContentCopyIcon fontSize="small" />}
+            onClick={copyInvite}
+            sx={{ height: tokens.controlHeightSm }}
+          >
+            Copy invite
+          </Button>
         </Box>
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: { xs: 2, sm: 4 },
+            gap: 2,
             flexWrap: 'wrap',
             color: 'text.secondary',
             fontSize: '0.875rem',
