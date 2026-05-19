@@ -291,6 +291,8 @@ export function EvidencePanel({
               onChange={(e) => setCaption(e.target.value)}
               size="small"
               fullWidth
+              slotProps={{ htmlInput: { maxLength: 80 } }}
+              helperText={`${caption.length}/80`}
             />
             {uploading && (
               <LinearProgress
