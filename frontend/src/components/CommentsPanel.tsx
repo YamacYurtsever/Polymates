@@ -117,11 +117,45 @@ export function CommentsPanel({ betId, onCountChange }: { betId: string; onCount
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-      {comments.length === 0 && (
-        <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-          No comments yet. Be the first.
-        </Typography>
+      {user && (
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 1.5, mb: 2.5, alignItems: 'flex-start' }}>
+          <Avatar
+            sx={{
+              width: 30,
+              height: 30,
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              flexShrink: 0,
+              mt: 0.5,
+              bgcolor: tokens.hairline,
+              color: tokens.ink,
+            }}
+          >
+            {user.email?.[0]?.toUpperCase() ?? '?'}
+          </Avatar>
+          <TextField
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Add a comment…"
+            multiline
+            maxRows={4}
+            fullWidth
+            size="small"
+            inputProps={{ maxLength: 500 }}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            size="small"
+            disabled={submitting || !body.trim()}
+            sx={{ height: tokens.controlHeightSm, flexShrink: 0 }}
+          >
+            Post
+          </Button>
+        </Box>
       )}
+
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       {comments.map((c) => (
         <Box
@@ -163,46 +197,6 @@ export function CommentsPanel({ betId, onCountChange }: { betId: string; onCount
       ))}
 
       <div ref={bottomRef} />
-
-      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-
-      {user && (
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 1.5, mt: 2.5, alignItems: 'flex-start' }}>
-          <Avatar
-            sx={{
-              width: 30,
-              height: 30,
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              flexShrink: 0,
-              mt: 0.5,
-              bgcolor: tokens.hairline,
-              color: tokens.ink,
-            }}
-          >
-            {user.email?.[0]?.toUpperCase() ?? '?'}
-          </Avatar>
-          <TextField
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder="Add a comment…"
-            multiline
-            maxRows={4}
-            fullWidth
-            size="small"
-            inputProps={{ maxLength: 500 }}
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            size="small"
-            disabled={submitting || !body.trim()}
-            sx={{ height: tokens.controlHeightSm, flexShrink: 0 }}
-          >
-            Post
-          </Button>
-        </Box>
-      )}
     </Box>
   )
 }
