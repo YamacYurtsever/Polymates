@@ -442,7 +442,7 @@ A live comment thread on each bet page, visible to all group members. Renders as
 | created_at | timestamptz | |
 
 ### Database — `backend/migrations/m8_comments.sql`
-- [ ] Create `comments` table with all fields above
+- [x] Create `comments` table with all fields above
 - [ ] `grant select, insert on public.comments to authenticated`
 - [ ] Enable RLS on `comments`
 - [ ] RLS policy: users can read comments for bets in groups they belong to

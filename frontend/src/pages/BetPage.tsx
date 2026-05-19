@@ -5,6 +5,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { LoadingGavel } from '../components/LoadingGavel'
 import { supabase } from '../lib/supabase'
 import { useCountdownState } from '../hooks/useCountdown'
+import { CommentsPanel } from '../components/CommentsPanel'
 import { EvidencePanel } from '../components/EvidencePanel'
 import { PositionsBreakdown } from '../components/PositionsBreakdown'
 import { ProbabilityBar } from '../components/ProbabilityBar'
@@ -22,6 +23,7 @@ export function BetPage() {
   const [error, setError] = useState<string | null>(null)
   const [tab, setTab] = useState(0)
   const tabSetByVerdict = useRef(false)
+  const [commentCount, setCommentCount] = useState(0)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -369,12 +371,16 @@ export function BetPage() {
       >
         <Tab label={`Positions · ${positions.length}`} />
         <Tab label="Evidence" />
+        <Tab label={`Comments · ${commentCount}`} />
       </Tabs>
 
       {tab === 0 && <PositionsBreakdown positions={positions} />}
       {tab === 1 && (
         <EvidencePanel betId={bet.id} closesAt={bet.closes_at} status={bet.status} />
       )}
+      <Box sx={{ display: tab === 2 ? 'block' : 'none' }}>
+        <CommentsPanel betId={bet.id} onCountChange={setCommentCount} />
+      </Box>
 
       <Snackbar
         open={copied}
