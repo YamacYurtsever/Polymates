@@ -180,12 +180,6 @@ export function BetPage() {
         )}
       </Box>
 
-      {verdict && (
-        <Box sx={{ mb: 4 }}>
-          <VerdictPanel verdict={verdict} positions={positions} />
-        </Box>
-      )}
-
       <Typography
         component="h1"
         sx={{
@@ -227,37 +221,36 @@ export function BetPage() {
             flexWrap: 'wrap',
           }}
         >
-          <Box>
-            <Typography variant="caption" color="text.secondary">
-              Pool
-            </Typography>
-            <Typography className="tabular" sx={{ fontWeight: 650, fontSize: '1.05rem' }}>
-              {pool.toLocaleString()} pts
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="text.secondary">
-              Bettors
-            </Typography>
-            <Typography className="tabular" sx={{ fontWeight: 650, fontSize: '1.05rem' }}>
-              {positions.length}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="text.secondary">
-              Closes
-            </Typography>
-            <Typography sx={{ fontWeight: 550, fontSize: '0.95rem' }}>
-              {new Date(bet.closes_at).toLocaleString([], {
+          {[
+            { label: 'Pool', value: `${pool.toLocaleString()} pts` },
+            { label: 'Bettors', value: positions.length },
+            {
+              label: 'Closes',
+              value: new Date(bet.closes_at).toLocaleString([], {
                 month: 'short',
                 day: 'numeric',
                 hour: 'numeric',
                 minute: '2-digit',
-              })}
-            </Typography>
-          </Box>
+              }),
+            },
+          ].map(({ label, value }) => (
+            <Box key={label} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
+              <Typography variant="caption" color="text.secondary">
+                {label}
+              </Typography>
+              <Typography className="tabular" sx={{ fontWeight: 650, fontSize: '0.9rem' }}>
+                {value}
+              </Typography>
+            </Box>
+          ))}
         </Box>
       </Box>
+
+      {verdict && (
+        <Box sx={{ mb: 4 }}>
+          <VerdictPanel verdict={verdict} positions={positions} />
+        </Box>
+      )}
 
       {!verdict && (
         <Box

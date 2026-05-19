@@ -126,19 +126,30 @@ function EvidenceModal({
   onNext: () => void
 }) {
   const item = index !== null ? evidence[index] : null
+  const urlCache = useRef<Map<string, string>>(new Map())
   const [url, setUrl] = useState<string | null>(null)
+
+  async function fetchUrl(path: string): Promise<string | null> {
+    if (urlCache.current.has(path)) return urlCache.current.get(path)!
+    const { data } = await supabase.storage.from('evidence').createSignedUrl(path, 3600)
+    if (data) urlCache.current.set(path, data.signedUrl)
+    return data?.signedUrl ?? null
+  }
 
   useEffect(() => {
     if (!item) return
-    async function load() {
+    // Show cached URL immediately if available, then prefetch neighbours
+    const cached = urlCache.current.get(item.storage_path)
+    if (cached) {
+      setUrl(cached)
+    } else {
       setUrl(null)
-      const { data } = await supabase.storage
-        .from('evidence')
-        .createSignedUrl(item!.storage_path, 3600)
-      if (data) setUrl(data.signedUrl)
+      fetchUrl(item.storage_path).then((u) => setUrl(u))
     }
-    load()
-  }, [item])
+    // Prefetch prev/next in the background
+    if (index !== null && index > 0) fetchUrl(evidence[index - 1].storage_path)
+    if (index !== null && index < evidence.length - 1) fetchUrl(evidence[index + 1].storage_path)
+  }, [item]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!item) return null
 
@@ -149,53 +160,78 @@ function EvidenceModal({
   return (
     <Dialog open={index !== null} onClose={onClose} maxWidth="lg">
       <DialogContent sx={{ position: 'relative', p: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IconButton onClick={onPrev} disabled={!hasPrev} size="small">
-            <ArrowBackIosNewIcon fontSize="small" />
-          </IconButton>
-
-          <Box sx={{ flex: 1 }}>
-            {url && isImage(item.storage_path) && (
-              <Box
-                component="img"
-                src={url}
-                alt={item.caption ?? filename}
-                sx={{
-                  display: 'block',
-                  maxWidth: '80vw',
-                  maxHeight: '65vh',
-                  objectFit: 'contain',
-                  mx: 'auto',
-                  mb: 2,
-                }}
-              />
-            )}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: item.caption ? 1 : 0 }}>
-              <Typography variant="body2">{item.username}</Typography>
-              <Typography variant="caption" color="text.secondary">
-                {relativeTime(item.created_at)}
-              </Typography>
-            </Box>
-            {item.caption && <Typography variant="body2">{item.caption}</Typography>}
-            {url && !isImage(item.storage_path) && (
-              <Button
-                component="a"
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                size="small"
-                variant="outlined"
-                sx={{ mt: 1 }}
-              >
-                {filename}
-              </Button>
-            )}
-          </Box>
-
-          <IconButton onClick={onNext} disabled={!hasNext} size="small">
-            <ArrowForwardIosIcon fontSize="small" />
-          </IconButton>
+        <Box sx={{ position: 'relative' }}>
+          {url && isImage(item.storage_path) && (
+            <Box
+              component="img"
+              src={url}
+              alt={item.caption ?? filename}
+              sx={{
+                display: 'block',
+                maxWidth: '80vw',
+                maxHeight: '65vh',
+                objectFit: 'contain',
+                mx: 'auto',
+                mb: 2,
+              }}
+            />
+          )}
+          {hasPrev && (
+            <IconButton
+              onClick={onPrev}
+              size="small"
+              sx={{
+                position: 'absolute',
+                left: 8,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                bgcolor: 'rgba(255,255,255,0.85)',
+                backdropFilter: 'blur(4px)',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.95)' },
+              }}
+            >
+              <ArrowBackIosNewIcon fontSize="small" />
+            </IconButton>
+          )}
+          {hasNext && (
+            <IconButton
+              onClick={onNext}
+              size="small"
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                bgcolor: 'rgba(255,255,255,0.85)',
+                backdropFilter: 'blur(4px)',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.95)' },
+              }}
+            >
+              <ArrowForwardIosIcon fontSize="small" />
+            </IconButton>
+          )}
         </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: item.caption ? 1 : 0 }}>
+          <Typography variant="body2">{item.username}</Typography>
+          <Typography variant="caption" color="text.secondary">
+            {relativeTime(item.created_at)}
+          </Typography>
+        </Box>
+        {item.caption && <Typography variant="body2">{item.caption}</Typography>}
+        {url && !isImage(item.storage_path) && (
+          <Button
+            component="a"
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            size="small"
+            variant="outlined"
+            sx={{ mt: 1 }}
+          >
+            {filename}
+          </Button>
+        )}
 
         {evidence.length > 1 && (
           <Typography
