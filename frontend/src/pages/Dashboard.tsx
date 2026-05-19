@@ -67,24 +67,10 @@ export function Dashboard() {
     setCreating(true)
     setCreateError(null)
 
-    const { data: group, error: groupErr } = await supabase
-      .from('groups')
-      .insert({ name: groupName, created_by: user.id })
-      .select()
-      .single()
+    const { data: groupId, error } = await supabase.rpc('create_group', { group_name: groupName })
 
-    if (groupErr) {
-      setCreateError(groupErr.message)
-      setCreating(false)
-      return
-    }
-
-    const { error: memberErr } = await supabase
-      .from('group_members')
-      .insert({ group_id: group.id, user_id: user.id })
-
-    if (memberErr) {
-      setCreateError(memberErr.message)
+    if (error) {
+      setCreateError(error.message)
       setCreating(false)
       return
     }
@@ -92,7 +78,7 @@ export function Dashboard() {
     setDialogOpen(false)
     setGroupName('')
     setCreating(false)
-    navigate(`/groups/${group.id}`)
+    navigate(`/groups/${groupId}`)
   }
 
   return (
