@@ -11,6 +11,7 @@ export interface Bet {
   group_id: string
   group_name: string
   creator_username: string
+  share_token: string
 }
 
 export interface BetPosition {
