@@ -21,8 +21,6 @@ import { supabase } from '../lib/supabase'
 interface Group {
   id: string
   name: string
-  description: string
-  invite_token: string
   member_count: number
 }
 
@@ -35,7 +33,6 @@ export function Dashboard() {
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [groupName, setGroupName] = useState('')
-  const [groupDesc, setGroupDesc] = useState('')
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
 
@@ -48,7 +45,7 @@ export function Dashboard() {
     setLoading(true)
     const { data, error } = await supabase
       .from('group_members')
-      .select('groups(id, name, description, invite_token, group_members(count))')
+      .select('groups(id, name, group_members(count))')
       .eq('user_id', user!.id)
 
     if (error) {
@@ -57,13 +54,7 @@ export function Dashboard() {
       const mapped: Group[] = (data ?? []).flatMap((row: any) => {
         const g = row.groups
         if (!g) return []
-        return [{
-          id: g.id,
-          name: g.name,
-          description: g.description,
-          invite_token: g.invite_token,
-          member_count: g.group_members?.[0]?.count ?? 0,
-        }]
+        return [{ id: g.id, name: g.name, member_count: g.group_members?.[0]?.count ?? 0 }]
       })
       setGroups(mapped)
     }
@@ -78,12 +69,7 @@ export function Dashboard() {
 
     const { data: group, error: groupErr } = await supabase
       .from('groups')
-      .insert({
-        name: groupName,
-        description: groupDesc,
-        invite_token: crypto.randomUUID(),
-        created_by: user.id,
-      })
+      .insert({ name: groupName, created_by: user.id })
       .select()
       .single()
 
@@ -95,7 +81,7 @@ export function Dashboard() {
 
     const { error: memberErr } = await supabase
       .from('group_members')
-      .insert({ group_id: group.id, user_id: user.id, role: 'admin' })
+      .insert({ group_id: group.id, user_id: user.id })
 
     if (memberErr) {
       setCreateError(memberErr.message)
@@ -105,7 +91,6 @@ export function Dashboard() {
 
     setDialogOpen(false)
     setGroupName('')
-    setGroupDesc('')
     setCreating(false)
     navigate(`/groups/${group.id}`)
   }
@@ -140,12 +125,7 @@ export function Dashboard() {
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     {g.name}
                   </Typography>
-                  {g.description && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                      {g.description}
-                    </Typography>
-                  )}
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
                     {g.member_count} {g.member_count === 1 ? 'member' : 'members'}
                   </Typography>
                 </CardContent>
@@ -158,8 +138,8 @@ export function Dashboard() {
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="xs">
         <Box component="form" onSubmit={handleCreateGroup}>
           <DialogTitle>Create Group</DialogTitle>
-          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '8px !important' }}>
-            {createError && <Alert severity="error">{createError}</Alert>}
+          <DialogContent sx={{ pt: '8px !important' }}>
+            {createError && <Alert severity="error" sx={{ mb: 2 }}>{createError}</Alert>}
             <TextField
               label="Group name"
               value={groupName}
@@ -167,14 +147,6 @@ export function Dashboard() {
               required
               autoFocus
               fullWidth
-            />
-            <TextField
-              label="Description"
-              value={groupDesc}
-              onChange={(e) => setGroupDesc(e.target.value)}
-              fullWidth
-              multiline
-              rows={2}
             />
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>

@@ -21,15 +21,12 @@ import { useAuth } from '../contexts/AuthContext'
 interface Group {
   id: string
   name: string
-  description: string
   invite_token: string
 }
 
 interface Member {
   user_id: string
-  role: string
-  display_name: string
-  avatar_url: string | null
+  username: string
   points: number
 }
 
@@ -51,10 +48,10 @@ export function GroupPage() {
     setLoading(true)
 
     const [groupRes, membersRes] = await Promise.all([
-      supabase.from('groups').select('id, name, description, invite_token').eq('id', id!).single(),
+      supabase.from('groups').select('id, name, invite_token').eq('id', id!).single(),
       supabase
         .from('group_members')
-        .select('user_id, role, users(display_name, avatar_url, points)')
+        .select('user_id, points, users(username)')
         .eq('group_id', id!),
     ])
 
@@ -67,10 +64,8 @@ export function GroupPage() {
     if (!membersRes.error) {
       const mapped: Member[] = (membersRes.data ?? []).map((row: any) => ({
         user_id: row.user_id,
-        role: row.role,
-        display_name: row.users?.display_name ?? 'Unknown',
-        avatar_url: row.users?.avatar_url ?? null,
-        points: row.users?.points ?? 0,
+        username: row.users?.username ?? 'Unknown',
+        points: row.points,
       }))
       setMembers(mapped)
     }
@@ -105,11 +100,6 @@ export function GroupPage() {
         <Typography variant="h5" sx={{ fontWeight: 700 }}>
           {group.name}
         </Typography>
-        {group.description && (
-          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-            {group.description}
-          </Typography>
-        )}
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 4 }}>
@@ -130,19 +120,16 @@ export function GroupPage() {
             {i > 0 && <Divider component="li" />}
             <ListItem disableGutters>
               <ListItemAvatar>
-                <Avatar src={m.avatar_url ?? undefined} sx={{ width: 36, height: 36 }}>
-                  {m.display_name[0]?.toUpperCase()}
+                <Avatar sx={{ width: 36, height: 36 }}>
+                  {m.username[0]?.toUpperCase()}
                 </Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{m.display_name}</span>
+                    <span>{m.username}</span>
                     {m.user_id === user?.id && (
                       <Typography variant="caption" color="text.secondary">(you)</Typography>
-                    )}
-                    {m.role === 'admin' && (
-                      <Typography variant="caption" color="primary">admin</Typography>
                     )}
                   </Box>
                 }

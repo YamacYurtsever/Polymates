@@ -14,7 +14,6 @@ import { useAuth } from '../contexts/AuthContext'
 interface GroupPreview {
   id: string
   name: string
-  description: string
   member_count: number
 }
 
@@ -34,27 +33,19 @@ export function InvitePage() {
   }, [token])
 
   async function fetchGroup() {
-    const { data, error } = await supabase
-      .from('groups')
-      .select('id, name, description, group_members(count)')
-      .eq('invite_token', token!)
-      .single()
+    const { data, error } = await supabase.rpc('get_group_by_invite_token', { token })
 
-    if (error || !data) {
+    if (error || !data?.length) {
       setError('Invite link is invalid or expired.')
     } else {
-      setGroup({
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        member_count: (data as any).group_members?.[0]?.count ?? 0,
-      })
+      const g = data[0]
+      setGroup({ id: g.id, name: g.name, member_count: Number(g.member_count) })
 
       if (user) {
         const { data: existing } = await supabase
           .from('group_members')
           .select('user_id')
-          .eq('group_id', data.id)
+          .eq('group_id', g.id)
           .eq('user_id', user.id)
           .maybeSingle()
         if (existing) setAlreadyMember(true)
@@ -70,7 +61,7 @@ export function InvitePage() {
 
     const { error } = await supabase
       .from('group_members')
-      .insert({ group_id: group.id, user_id: user.id, role: 'member' })
+      .insert({ group_id: group.id, user_id: user.id })
 
     if (error) {
       setError(error.message)
@@ -101,9 +92,6 @@ export function InvitePage() {
             <Typography variant="h4" sx={{ fontWeight: 700 }}>
               {group.name}
             </Typography>
-            {group.description && (
-              <Typography color="text.secondary">{group.description}</Typography>
-            )}
             <Typography variant="body2" color="text.secondary">
               {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
             </Typography>
