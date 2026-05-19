@@ -82,7 +82,7 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
           <Typography variant="caption" color="text.secondary" display="block">
             {item.username}
           </Typography>
-          <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.25 }}>
+          <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 1 }}>
             {relativeTime(item.created_at)}
           </Typography>
           {item.caption && (
