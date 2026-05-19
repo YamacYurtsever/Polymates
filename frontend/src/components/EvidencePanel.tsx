@@ -48,41 +48,50 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
   const filename = item.storage_path.split('/').pop() ?? 'file'
 
   return (
-    <Card variant="outlined" sx={{ mb: 1.5 }}>
-      <CardContent sx={{ '&:last-child': { pb: 2 } }}>
-        <Typography variant="caption" color="text.secondary">
+    <Card variant="outlined" sx={{ width: 160, flexShrink: 0 }}>
+      {url && isImage(item.storage_path) ? (
+        <Box
+          component="a"
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{ display: 'block' }}
+        >
+          <Box
+            component="img"
+            src={url}
+            alt={item.caption ?? filename}
+            sx={{
+              width: '100%',
+              height: 120,
+              objectFit: 'cover',
+              display: 'block',
+              cursor: 'pointer',
+              transition: 'opacity 0.15s',
+              '&:hover': { opacity: 0.85 },
+            }}
+          />
+        </Box>
+      ) : null}
+      <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+        <Typography variant="caption" color="text.secondary" display="block">
           {item.username}
         </Typography>
         {item.caption && (
-          <Typography variant="body2" sx={{ mt: 0.5, mb: 1 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              mt: 0.25,
+              display: 'block',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {item.caption}
           </Typography>
         )}
-        {url && isImage(item.storage_path) ? (
-          <Box
-            component="a"
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{ display: 'inline-block', mt: item.caption ? 0 : 0.5 }}
-          >
-            <Box
-              component="img"
-              src={url}
-              alt={item.caption ?? filename}
-              sx={{
-                width: 120,
-                height: 120,
-                objectFit: 'cover',
-                borderRadius: 1,
-                display: 'block',
-                cursor: 'pointer',
-                transition: 'opacity 0.15s',
-                '&:hover': { opacity: 0.85 },
-              }}
-            />
-          </Box>
-        ) : url ? (
+        {url && !isImage(item.storage_path) && (
           <Button
             component="a"
             href={url}
@@ -90,11 +99,11 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
             rel="noopener noreferrer"
             size="small"
             variant="outlined"
-            sx={{ mt: item.caption ? 0 : 0.5 }}
+            sx={{ mt: 0.5 }}
           >
             {filename}
           </Button>
-        ) : null}
+        )}
       </CardContent>
     </Card>
   )
@@ -304,9 +313,11 @@ export function EvidencePanel({
       ) : (
         <Box>
           {canSubmit && <Divider sx={{ mb: 2 }} />}
-          {evidence.map((item) => (
-            <EvidenceCard key={item.id} item={item} />
-          ))}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+            {evidence.map((item) => (
+              <EvidenceCard key={item.id} item={item} />
+            ))}
+          </Box>
         </Box>
       )}
     </Box>
