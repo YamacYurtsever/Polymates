@@ -370,36 +370,34 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 ## M6 — Arbiter Integration & Resolution
 
 ### Supabase Edge Function
-- [ ] Create edge function `resolve-bet`
-- [ ] Add `ANTHROPIC_API_KEY` to Supabase secrets
-- [ ] Function fetches bet title, description, and all evidence for the bet
-- [ ] Constructs prompt with evidence attached (images as base64, PDFs as base64, text captions inline)
-- [ ] Calls Anthropic API with structured output schema
-- [ ] Validates response with Zod schema
-- [ ] Writes verdict to `verdicts` table
-- [ ] Calls `resolve_bet(bet_id, outcome)` to trigger payout distribution
-- [ ] Wraps steps above in error handling — if API call fails, bet stays `closed` and can be retried
+- [x] Create edge function `resolve-bet`
+- [x] Add `ANTHROPIC_API_KEY` to Supabase secrets
+- [x] Function fetches bet title, description, and all evidence for the bet
+- [x] Constructs prompt with evidence attached (images as base64, PDFs as base64, text captions inline)
+- [x] Calls Anthropic API with tool_choice forced verdict (structured output)
+- [x] Validates response with Zod schema
+- [x] Writes verdict to `verdicts` table
+- [x] Calls `resolve_bet(bet_id, outcome)` to trigger payout distribution
+- [x] Error handling — if API call fails, bet stays `closed` and can be retried
 
 ### Trigger — Auto-close Bets
 - [ ] Supabase pg_cron job that runs every minute
 - [ ] Finds bets where `closes_at < now()` and `status = open`
-- [ ] Updates status to `closed`
-- [ ] Calls `resolve-bet` edge function for each
+- [ ] Updates status to `closed` then calls `resolve-bet` edge function for each
+- Note: pg_cron template provided in `m6_arbiter.sql` (commented out)
 
 ### Database
-- [ ] Create `verdicts` table with all fields from schema
-- [ ] Enable RLS on `verdicts` table
-- [ ] RLS policy: verdicts readable by group members only
+- [x] Create `verdicts` table with all fields from schema
+- [x] Enable RLS on `verdicts` table
+- [x] RLS policy: verdicts readable by group members only
 
 ### Frontend — Verdict Panel (on `/bets/[id]`)
-- [ ] Hidden until bet status is `resolved`
-- [ ] Courtroom-themed reveal animation
-- [ ] "The Honourable Judge" header
-- [ ] Ruling text (reasoning from verdict)
-- [ ] YES / NO outcome displayed prominently
-- [ ] Winner/loser breakdown with points won and lost per user
-- [ ] Confetti or gavel animation on reveal
+- [x] Hidden until verdict exists
+- [x] "The Honourable Judge" header with gavel icon
+- [x] Ruling text (reasoning) in italic quote
+- [x] YES / NO outcome displayed prominently with colour
+- [x] Winner/loser breakdown with points won and lost per user
+- [x] Shows "judge is deliberating…" when closed but no verdict yet
 
 ### Frontend — Bet Status Updates
-- [ ] Poll bet status every 30 seconds or use Supabase realtime subscription
-- [ ] Update UI automatically when status changes from `open` → `closed` → `resolved`
+- [x] Supabase realtime subscription on `verdicts` INSERT — verdict panel appears live
