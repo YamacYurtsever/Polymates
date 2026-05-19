@@ -3,7 +3,7 @@
 -- Verdicts table
 create table if not exists public.verdicts (
   id         uuid primary key default gen_random_uuid(),
-  bet_id     uuid not null references public.bets(id) on delete cascade,
+  bet_id     uuid not null references public.bets(id) on delete cascade unique,
   outcome    public.bet_side not null,
   reasoning  text not null,
   created_at timestamptz not null default now()
@@ -11,6 +11,13 @@ create table if not exists public.verdicts (
 
 -- Grants
 grant select on public.verdicts to authenticated;
+
+-- service_role grants for the resolve-bet edge function
+grant select, update on public.bets to service_role;
+grant select on public.bet_positions to service_role;
+grant select on public.evidence to service_role;
+grant select, insert on public.verdicts to service_role;
+grant execute on function public.resolve_bet(uuid, public.bet_side) to service_role;
 
 -- RLS
 alter table public.verdicts enable row level security;
@@ -24,24 +31,3 @@ create policy "verdicts: read as group member"
     )
   );
 
--- pg_cron: auto-close bets past their deadline and trigger the arbiter
--- NOTE: requires pg_cron extension enabled in Supabase dashboard (Database → Extensions)
--- and the resolve-bet edge function deployed.
---
--- select cron.schedule(
---   'close-expired-bets',
---   '* * * * *',
---   $$
---     select net.http_post(
---       url := current_setting('app.supabase_url') || '/functions/v1/resolve-bet',
---       headers := jsonb_build_object(
---         'Content-Type', 'application/json',
---         'Authorization', 'Bearer ' || current_setting('app.service_role_key')
---       ),
---       body := jsonb_build_object('bet_id', id)
---     )
---     from public.bets
---     where status = 'open'
---       and closes_at < now();
---   $$
--- );

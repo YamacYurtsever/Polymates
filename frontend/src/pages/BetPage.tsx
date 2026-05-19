@@ -84,6 +84,11 @@ export function BetPage() {
 
       if (!verdictRes.error && verdictRes.data) {
         setVerdict(verdictRes.data as Verdict)
+      } else if (betRes.data) {
+        const row = betRes.data as unknown as BetRow
+        if (new Date(row.closes_at) < new Date()) {
+          supabase.functions.invoke('resolve-bet', { body: { bet_id: id } })
+        }
       }
 
       setLoading(false)
@@ -203,10 +208,13 @@ export function BetPage() {
           </Typography>
           <VerdictPanel verdict={verdict} positions={positions} />
         </>
-      ) : bet.status === 'closed' ? (
-        <Typography variant="body2" color="text.secondary">
-          The judge is deliberating…
-        </Typography>
+      ) : bet.status === 'closed' || new Date(bet.closes_at) < new Date() ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <CircularProgress size={16} thickness={5} />
+          <Typography variant="body2" color="text.secondary">
+            The judge is deliberating…
+          </Typography>
+        </Box>
       ) : null}
     </Box>
   )

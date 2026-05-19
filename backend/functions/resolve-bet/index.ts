@@ -21,6 +21,8 @@ function toBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
+const ANTHROPIC_MAX_FILE_BYTES = 5 * 1024 * 1024;
+
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"] as const;
 type ImageMediaType = (typeof IMAGE_TYPES)[number];
 
@@ -28,7 +30,16 @@ function isImageType(mime: string): mime is ImageMediaType {
   return IMAGE_TYPES.includes(mime as ImageMediaType);
 }
 
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: CORS });
+  }
+
   try {
     const { bet_id } = await req.json();
     if (!bet_id) return json({ error: "bet_id required" }, 400);
@@ -40,11 +51,28 @@ Deno.serve(async (req) => {
 
     const { data: bet, error: betErr } = await supabase
       .from("bets")
-      .select("id, title, description, status")
+      .select("id, title, description, status, closes_at")
       .eq("id", bet_id)
       .single();
     if (betErr || !bet) return json({ error: "bet not found" }, 404);
-    if (bet.status !== "closed") return json({ error: `bet status is ${bet.status}` }, 409);
+
+    const { data: existing } = await supabase
+      .from("verdicts")
+      .select("id")
+      .eq("bet_id", bet_id)
+      .maybeSingle();
+    if (existing) return json({ ok: true, verdict: "already resolved" });
+    if (bet.status === "closed") {
+      // already closed, proceed to verdict
+    } else if (bet.status === "open" && new Date(bet.closes_at) < new Date()) {
+      const { error: closeErr } = await supabase
+        .from("bets")
+        .update({ status: "closed" })
+        .eq("id", bet_id);
+      if (closeErr) throw closeErr;
+    } else {
+      return json({ error: `bet status is ${bet.status}` }, 409);
+    }
 
     const { data: evidence } = await supabase
       .from("evidence")
@@ -63,19 +91,23 @@ Deno.serve(async (req) => {
       if (!file) continue;
 
       const bytes = new Uint8Array(await file.arrayBuffer());
-      const b64 = toBase64(bytes);
       const mime = file.type || "";
 
-      if (isImageType(mime)) {
-        content.push({
-          type: "image",
-          source: { type: "base64", media_type: mime, data: b64 },
-        });
-      } else if (mime === "application/pdf") {
-        content.push({
-          type: "document",
-          source: { type: "base64", media_type: "application/pdf", data: b64 },
-        });
+      if (bytes.length > ANTHROPIC_MAX_FILE_BYTES) {
+        content.push({ type: "text", text: `[Evidence skipped: file too large (${Math.round(bytes.length / 1024 / 1024)}MB > 5MB limit)]` });
+      } else {
+        const b64 = toBase64(bytes);
+        if (isImageType(mime)) {
+          content.push({
+            type: "image",
+            source: { type: "base64", media_type: mime, data: b64 },
+          });
+        } else if (mime === "application/pdf") {
+          content.push({
+            type: "document",
+            source: { type: "base64", media_type: "application/pdf", data: b64 },
+          });
+        }
       }
 
       if (e.caption) content.push({ type: "text", text: `Caption: ${e.caption}` });
@@ -133,6 +165,6 @@ Deno.serve(async (req) => {
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "content-type": "application/json" },
+    headers: { ...CORS, "content-type": "application/json" },
   });
 }
