@@ -19,6 +19,7 @@ export function BetPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tab, setTab] = useState(0)
+  const tabSetByVerdict = useRef(false)
 
   useEffect(() => {
     if (!id) return
@@ -116,6 +117,13 @@ export function BetPage() {
       supabase.removeChannel(channel)
     }
   }, [id])
+
+  useEffect(() => {
+    if (verdict && !tabSetByVerdict.current) {
+      tabSetByVerdict.current = true
+      setTab(1)
+    }
+  }, [verdict])
 
   function handleWager(position: BetPosition) {
     setPositions((prev) => [...prev, position])
