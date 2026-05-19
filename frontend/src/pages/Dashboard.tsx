@@ -367,7 +367,7 @@ export function Dashboard() {
 
       <Dialog open={modalOpen} onClose={() => setModalOpen(false)} fullWidth maxWidth="xs">
         <Box component="form" onSubmit={handleCreate}>
-          <DialogTitle sx={{ pb: 1 }}>New group</DialogTitle>
+          <DialogTitle sx={{ pb: 1, textAlign: 'center' }}>New group</DialogTitle>
           <DialogContent>
             {formError && (
               <Alert severity="error" sx={{ mb: 2 }}>
@@ -385,7 +385,7 @@ export function Dashboard() {
               placeholder="The Tuesday Crew"
             />
           </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
+          <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'center' }}>
             <Button onClick={() => setModalOpen(false)}>Cancel</Button>
             <Button type="submit" variant="contained" disabled={submitting}>
               {submitting ? 'Creating…' : 'Create group'}

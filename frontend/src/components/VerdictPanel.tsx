@@ -41,7 +41,7 @@ export function VerdictPanel({
       }}
     >
       <Box sx={{ bgcolor: tint, px: { xs: 2.5, sm: 3 }, py: 2.5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <GavelIcon sx={{ fontSize: 16, color: main }} />
           <Typography
             sx={{
@@ -55,26 +55,26 @@ export function VerdictPanel({
             The honourable judge rules
           </Typography>
         </Box>
-        <Typography
-          className="tabular"
-          sx={{
-            fontWeight: 650,
-            fontSize: { xs: '3rem', sm: '4rem' },
-            letterSpacing: '-0.03em',
-            lineHeight: 1,
-            color: main,
-            mb: 1.5,
-          }}
-        >
-          {verdict.outcome.toUpperCase()}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 2 }}>
+          <Typography
+            className="tabular"
+            sx={{
+              fontWeight: 650,
+              fontSize: { xs: '2rem', sm: '2.5rem' },
+              letterSpacing: '-0.03em',
+              lineHeight: 1,
+              color: main,
+            }}
+          >
+            {verdict.outcome.toUpperCase()}
+          </Typography>
+        </Box>
         <Typography
           sx={{
             fontStyle: 'italic',
             color: tokens.ink,
-            lineHeight: 1.55,
+            lineHeight: 1.6,
             fontSize: '0.975rem',
-            maxWidth: 640,
           }}
         >
           "{verdict.reasoning}"
@@ -95,7 +95,7 @@ export function VerdictPanel({
                 fontSize: '0.7rem',
                 fontWeight: 650,
                 letterSpacing: '0.12em',
-                color: tokens.yes,
+                color: tokens.inkSecondary,
                 mb: 1,
               }}
             >
@@ -133,7 +133,7 @@ export function VerdictPanel({
                     >
                       {p.username[0]?.toUpperCase() ?? '?'}
                     </Avatar>
-                    <Typography sx={{ fontSize: '0.875rem', flexGrow: 1 }}>{p.username}</Typography>
+                    <Typography sx={{ fontSize: '0.875rem' }}>{p.username}</Typography>
                     <Typography
                       className="tabular"
                       sx={{ color: tokens.yes, fontWeight: 650, fontSize: '0.875rem' }}
@@ -152,7 +152,7 @@ export function VerdictPanel({
                 fontSize: '0.7rem',
                 fontWeight: 650,
                 letterSpacing: '0.12em',
-                color: tokens.no,
+                color: tokens.inkSecondary,
                 mb: 1,
               }}
             >
@@ -188,7 +188,7 @@ export function VerdictPanel({
                   >
                     {p.username[0]?.toUpperCase() ?? '?'}
                   </Avatar>
-                  <Typography sx={{ fontSize: '0.875rem', flexGrow: 1 }}>{p.username}</Typography>
+                  <Typography sx={{ fontSize: '0.875rem' }}>{p.username}</Typography>
                   <Typography
                     className="tabular"
                     sx={{ color: tokens.no, fontWeight: 650, fontSize: '0.875rem' }}

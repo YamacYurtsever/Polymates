@@ -96,14 +96,15 @@ function ActiveBetCard({ bet }: { bet: BetRow }) {
 function ResolvedBetCard({ bet }: { bet: BetRow }) {
   const isYes = bet.verdict_outcome === 'yes'
   const main = bet.verdict_outcome ? (isYes ? tokens.yes : tokens.no) : tokens.inkSecondary
+  const chipLabel = bet.verdict_outcome ? bet.verdict_outcome.toUpperCase() : 'pending'
   return (
     <Box
       component={RouterLink}
       to={`/bets/${bet.id}`}
       sx={{
         display: 'flex',
-        alignItems: 'center',
-        gap: 2,
+        flexDirection: 'column',
+        gap: 1.25,
         p: 2,
         border: 1,
         borderColor: 'divider',
@@ -115,15 +116,27 @@ function ResolvedBetCard({ bet }: { bet: BetRow }) {
         '&:hover': { borderColor: '#C8C8CD' },
       }}
     >
-      <Typography sx={{ fontWeight: 550, fontSize: '0.925rem', flexGrow: 1 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Chip label={chipLabel} size="small" variant="outlined" sx={{ color: main }} />
+        <Typography variant="caption" color="text.secondary">
+          {new Date(bet.closes_at).toLocaleDateString()}
+        </Typography>
+      </Box>
+      <Typography
+        sx={{
+          fontWeight: 600,
+          fontSize: '0.975rem',
+          lineHeight: 1.35,
+          minHeight: 42,
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}
+      >
         {bet.title}
       </Typography>
-      <Chip
-        label={bet.verdict_outcome ? bet.verdict_outcome : 'resolved'}
-        size="small"
-        variant="outlined"
-        sx={{ color: main }}
-      />
+      <ProbabilityBar yesTotal={bet.yes_total} noTotal={bet.no_total} size="sm" />
     </Box>
   )
 }
@@ -156,7 +169,7 @@ export function GroupPage() {
       closes_at: string
       status: 'open' | 'closed'
       bet_positions: { side: 'yes' | 'no'; amount: number }[]
-      verdicts: { outcome: 'yes' | 'no' }[]
+      verdicts: { outcome: 'yes' | 'no' } | null
     }
     async function fetchGroup() {
       setLoading(true)
@@ -203,7 +216,7 @@ export function GroupPage() {
           no_total: b.bet_positions
             .filter((p) => p.side === 'no')
             .reduce((s, p) => s + p.amount, 0),
-          verdict_outcome: b.verdicts?.[0]?.outcome ?? null,
+          verdict_outcome: b.verdicts?.outcome ?? null,
         }))
         setBets(mapped)
       }
@@ -261,8 +274,9 @@ export function GroupPage() {
     return <Alert severity="error">{error ?? 'Group not found.'}</Alert>
   }
 
-  const activeBets = bets.filter((b) => b.status === 'open')
-  const resolvedBets = bets.filter((b) => b.status === 'closed')
+  const now = new Date()
+  const activeBets = bets.filter((b) => b.status === 'open' && new Date(b.closes_at) > now)
+  const resolvedBets = bets.filter((b) => b.status === 'closed' || new Date(b.closes_at) <= now)
   const myBalance = members.find((m) => m.user_id === user?.id)?.points
   const rankedMembers = [...members].sort((a, b) => b.points - a.points)
 
@@ -385,7 +399,13 @@ export function GroupPage() {
             </Typography>
           </Box>
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gap: 1.5,
+            }}
+          >
             {resolvedBets.map((b) => (
               <ResolvedBetCard key={b.id} bet={b} />
             ))}
@@ -441,6 +461,7 @@ export function GroupPage() {
               </Avatar>
               <Typography sx={{ fontWeight: 550, fontSize: '0.95rem', flexGrow: 1 }}>
                 {m.username}
+                {i === 0 && ' 🏆'}
                 {m.user_id === user?.id && (
                   <Typography
                     component="span"
@@ -469,7 +490,7 @@ export function GroupPage() {
 
       <Dialog open={betModalOpen} onClose={() => setBetModalOpen(false)} fullWidth maxWidth="sm">
         <Box component="form" onSubmit={handleCreateBet}>
-          <DialogTitle sx={{ pb: 1 }}>New bet</DialogTitle>
+          <DialogTitle sx={{ pb: 1, textAlign: 'center' }}>New bet</DialogTitle>
           <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             {betError && <Alert severity="error">{betError}</Alert>}
             <TextField
@@ -500,7 +521,7 @@ export function GroupPage() {
               slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: minDatetime() } }}
             />
           </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
+          <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'center' }}>
             <Button onClick={() => setBetModalOpen(false)}>Cancel</Button>
             <Button type="submit" variant="contained" disabled={betSubmitting}>
               {betSubmitting ? 'Creating…' : 'Create bet'}

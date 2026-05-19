@@ -53,14 +53,6 @@ begin
     raise exception 'insufficient points';
   end if;
 
-  -- one position per user per bet (also enforced by unique constraint)
-  if exists (
-    select 1 from bet_positions
-    where bet_id = p_bet_id and user_id = auth.uid()
-  ) then
-    raise exception 'already placed a bet on this';
-  end if;
-
   insert into bet_positions (bet_id, user_id, side, amount)
   values (p_bet_id, auth.uid(), p_side, p_amount);
 

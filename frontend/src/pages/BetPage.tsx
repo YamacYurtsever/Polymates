@@ -274,8 +274,6 @@ export function BetPage() {
             betId={bet.id}
             groupId={bet.group_id}
             status={bet.status}
-            yesTotal={yesTotal}
-            noTotal={noTotal}
             onWager={handleWager}
           />
         </Box>

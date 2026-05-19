@@ -27,8 +27,7 @@ create table if not exists public.bet_positions (
   user_id    uuid not null references public.users(id) on delete cascade,
   side       public.bet_side not null,
   amount     integer not null check (amount > 0),
-  created_at timestamptz not null default now(),
-  unique (bet_id, user_id)
+  created_at timestamptz not null default now()
 );
 
 -- Grants

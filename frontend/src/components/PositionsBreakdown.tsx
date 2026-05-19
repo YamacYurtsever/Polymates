@@ -3,9 +3,6 @@ import { tokens } from '../theme'
 import type { BetPosition } from '../types'
 
 function PositionRow({ position }: { position: BetPosition }) {
-  const isYes = position.side === 'yes'
-  const main = isYes ? tokens.yes : tokens.no
-  const tint = isYes ? tokens.yesTint : tokens.noTint
   return (
     <Box
       sx={{
@@ -33,13 +30,6 @@ function PositionRow({ position }: { position: BetPosition }) {
       <Typography sx={{ fontWeight: 550, fontSize: '0.9rem', flexGrow: 1 }}>
         {position.username}
       </Typography>
-      <Box sx={{ px: 1, py: 0.25, borderRadius: 0.75, bgcolor: tint }}>
-        <Typography
-          sx={{ fontSize: '0.7rem', fontWeight: 650, letterSpacing: '0.08em', color: main }}
-        >
-          {position.side.toUpperCase()}
-        </Typography>
-      </Box>
       <Typography
         className="tabular"
         sx={{ fontWeight: 600, fontSize: '0.9rem', minWidth: 70, textAlign: 'right' }}
