@@ -11,19 +11,20 @@ declare module '@mui/material/styles' {
   }
 }
 
+const FONT_SERIF = '"Playfair Display", Georgia, "Times New Roman", serif'
 const FONT_SANS =
   '"Inter", "Inter Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
 const FONT_MONO = '"JetBrains Mono", "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace'
 
-const BG = '#FAFAFA'
+const BG = '#F7F3EA'
 const SURFACE = '#FFFFFF'
-const INK = '#0E0E0F'
-const INK_SECONDARY = '#5C5C61'
-const INK_MUTED = '#8E8E93'
-const HAIRLINE = '#E5E5E7'
+const INK = '#1A1A1A'
+const INK_SECONDARY = '#4A4A50'
+const INK_MUTED = '#8A8A90'
+const HAIRLINE = '#DDD8CC'
 
-const BRAND = '#2D5BFF'
-const BRAND_DARK = '#1F44D6'
+const BRAND = '#1C2A5E'
+const BRAND_DARK = '#111C42'
 const YES = '#27AE60'
 const YES_TINT = '#EAF7EF'
 const NO = '#E64556'
@@ -41,9 +42,9 @@ export const theme = createTheme({
     no: { main: NO, light: NO_TINT, contrastText: '#fff' },
     divider: HAIRLINE,
     action: {
-      hover: 'rgba(14,14,15,0.035)',
-      selected: 'rgba(45,91,255,0.08)',
-      disabledBackground: 'rgba(14,14,15,0.06)',
+      hover: 'rgba(26,26,26,0.04)',
+      selected: 'rgba(28,42,94,0.08)',
+      disabledBackground: 'rgba(26,26,26,0.06)',
     },
   },
   shape: { borderRadius: 8 },
@@ -99,6 +100,7 @@ export const theme = createTheme({
         root: {
           borderRadius: 10,
           borderColor: HAIRLINE,
+          backgroundColor: SURFACE,
           transition: 'border-color 150ms ease-out, background-color 150ms ease-out',
         },
       },
@@ -117,7 +119,7 @@ export const theme = createTheme({
           boxShadow: 'none',
           '&:hover': { boxShadow: 'none' },
         },
-        outlined: { borderColor: HAIRLINE, color: INK },
+        outlined: { borderColor: HAIRLINE, color: INK, backgroundColor: SURFACE },
         sizeLarge: { paddingInline: 18, paddingBlock: 11, fontSize: '0.95rem' },
         sizeSmall: { paddingInline: 10, paddingBlock: 5, fontSize: '0.8125rem' },
       },
@@ -134,7 +136,7 @@ export const theme = createTheme({
           borderRadius: 8,
           backgroundColor: SURFACE,
           '& fieldset': { borderColor: HAIRLINE },
-          '&:hover fieldset': { borderColor: '#C8C8CD !important' },
+          '&:hover fieldset': { borderColor: '#B8B0A0 !important' },
         },
         input: { fontSize: '0.9375rem' },
       },
@@ -152,7 +154,7 @@ export const theme = createTheme({
           textTransform: 'lowercase',
           height: 22,
         },
-        outlined: { borderColor: HAIRLINE },
+        outlined: { borderColor: HAIRLINE, backgroundColor: SURFACE },
       },
     },
     MuiDivider: {
@@ -160,7 +162,7 @@ export const theme = createTheme({
     },
     MuiDialog: {
       styleOverrides: {
-        paper: { borderRadius: 12, border: `1px solid ${HAIRLINE}` },
+        paper: { borderRadius: 12, border: `1px solid ${HAIRLINE}`, backgroundColor: SURFACE },
       },
     },
     MuiToggleButton: {
@@ -195,6 +197,7 @@ export const theme = createTheme({
 })
 
 export const tokens = {
+  fontSerif: FONT_SERIF,
   fontMono: FONT_MONO,
   bg: BG,
   surface: SURFACE,

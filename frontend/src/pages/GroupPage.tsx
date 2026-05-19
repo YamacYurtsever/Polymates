@@ -362,6 +362,7 @@ export function GroupPage() {
               borderStyle: 'dashed',
               borderColor: 'divider',
               borderRadius: 1.25,
+              bgcolor: 'background.paper',
               p: 5,
               textAlign: 'center',
             }}
@@ -392,6 +393,7 @@ export function GroupPage() {
               borderStyle: 'dashed',
               borderColor: 'divider',
               borderRadius: 1.25,
+              bgcolor: 'background.paper',
               p: 5,
               textAlign: 'center',
             }}
