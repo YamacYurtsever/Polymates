@@ -34,6 +34,14 @@ function isImage(path: string) {
   return /\.(jpe?g|png|gif|webp)$/i.test(path)
 }
 
+function relativeTime(iso: string): string {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  return `${Math.floor(diff / 86400)}d ago`
+}
+
 function EvidenceCard({ item }: { item: EvidenceItem }) {
   const [url, setUrl] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
@@ -73,6 +81,9 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
         <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
           <Typography variant="caption" color="text.secondary" display="block">
             {item.username}
+          </Typography>
+          <Typography variant="caption" color="text.disabled" display="block">
+            {relativeTime(item.created_at)}
           </Typography>
           {item.caption && (
             <Typography
