@@ -15,3 +15,4 @@ backend/migrations/m6_cron_setup.sql
 
 # Node
 node_modules
+supabase/.temp/
