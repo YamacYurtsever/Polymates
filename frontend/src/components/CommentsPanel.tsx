@@ -157,14 +157,14 @@ export function CommentsPanel({ betId, onCountChange }: { betId: string; onCount
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-      {comments.map((c) => (
+      {comments.map((c, i) => (
         <Box
           key={c.id}
           sx={{
             display: 'flex',
             gap: 1.5,
             py: 1.75,
-            borderBottom: 1,
+            borderBottom: i < comments.length - 1 ? 1 : 0,
             borderColor: 'divider',
           }}
         >
