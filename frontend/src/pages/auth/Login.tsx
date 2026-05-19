@@ -39,7 +39,7 @@ export function Login() {
           gap: 2,
         }}
       >
-        <Typography variant="h5" fontWeight={600}>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
           Log in to Polymates
         </Typography>
 
