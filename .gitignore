@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 
+# SQL setup files containing secrets
+backend/migrations/m6_cron_setup.sql
+
 # Local Claude config
 .mcp.json
 .claude/settings.local.json
