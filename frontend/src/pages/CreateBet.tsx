@@ -109,13 +109,13 @@ export function CreateBet() {
           placeholder="Describe what counts as a win..."
         />
         <TextField
-          label="Evidence deadline"
+          label="Deadline"
           type="datetime-local"
           value={closesAt}
           onChange={(e) => setClosesAt(e.target.value)}
           required
           fullWidth
-          slotProps={{ htmlInput: { min: minDatetime } }}
+          slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: minDatetime } }}
         />
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
           <Button onClick={() => navigate(-1)}>Cancel</Button>
