@@ -1,16 +1,41 @@
+import { useState } from 'react'
 import { Routes, Route, Navigate, Link as RouterLink } from 'react-router-dom'
-import { Button, AppBar, Toolbar, Typography, Box } from '@mui/material'
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  Menu,
+  MenuItem,
+  Avatar,
+  IconButton,
+} from '@mui/material'
 import { useAuth } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Login } from './pages/auth/Login'
 import { SignUp } from './pages/auth/SignUp'
-import { Profile } from './pages/Profile'
 import { Dashboard } from './pages/Dashboard'
 import { GroupPage } from './pages/GroupPage'
 import { InvitePage } from './pages/InvitePage'
 
+function AccountMenu() {
+  const { user, signOut } = useAuth()
+  const [anchor, setAnchor] = useState<null | HTMLElement>(null)
+  const initial = (user?.email?.[0] ?? '?').toUpperCase()
+
+  return (
+    <>
+      <IconButton onClick={(e) => setAnchor(e.currentTarget)} size="small">
+        <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>{initial}</Avatar>
+      </IconButton>
+      <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
+        <MenuItem onClick={signOut}>Sign out</MenuItem>
+      </Menu>
+    </>
+  )
+}
+
 function Navbar() {
-  const { signOut } = useAuth()
   return (
     <AppBar
       position="static"
@@ -27,12 +52,7 @@ function Navbar() {
         >
           Polymates
         </Typography>
-        <Button component={RouterLink} to="/profile" size="small">
-          Profile
-        </Button>
-        <Button onClick={signOut} size="small">
-          Sign out
-        </Button>
+        <AccountMenu />
       </Toolbar>
     </AppBar>
   )
@@ -101,14 +121,6 @@ function App() {
         element={
           <ProtectedLayout>
             <div>Leaderboard</div>
-          </ProtectedLayout>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedLayout>
-            <Profile />
           </ProtectedLayout>
         }
       />

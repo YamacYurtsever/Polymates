@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 
 export function SignUp() {
   const navigate = useNavigate()
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -15,7 +16,11 @@ export function SignUp() {
     setError(null)
     setLoading(true)
 
-    const { error } = await supabase.auth.signUp({ email, password })
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { username } },
+    })
 
     if (error) {
       setError(error.message)
@@ -28,15 +33,7 @@ export function SignUp() {
 
   return (
     <Container maxWidth="xs">
-      <Box
-        sx={{
-          mt: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 2,
-        }}
-      >
+      <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
         <Typography variant="h5" sx={{ fontWeight: 600 }}>
           Create your account
         </Typography>
@@ -52,6 +49,14 @@ export function SignUp() {
           onSubmit={handleSubmit}
           sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}
         >
+          <TextField
+            label="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            fullWidth
+            autoComplete="username"
+          />
           <TextField
             label="Email"
             type="email"

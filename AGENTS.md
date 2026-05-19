@@ -48,28 +48,22 @@ Polymates is a social betting app for friend groups. Members create binary (Yes/
 |---|---|---|
 | id | uuid PK | Supabase Auth user id |
 | email | text | |
-| display_name | text | |
-| avatar_url | text | |
-| created_at | timestamptz | |
+| username | text | |
 
 ### `groups`
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
 | name | text | |
-| description | text | |
 | invite_token | uuid | Random UUID, shareable |
 | created_by | uuid FK → users | |
-| created_at | timestamptz | |
 
 ### `group_members`
 | Field | Type | Notes |
 |---|---|---|
 | group_id | uuid FK → groups | |
 | user_id | uuid FK → users | |
-| role | enum: admin\|member | Creator is admin |
 | points | integer | Starts at 1000 on join; scoped to this group |
-| joined_at | timestamptz | |
 
 ### `bets`
 | Field | Type | Notes |
@@ -100,9 +94,7 @@ Polymates is a social betting app for friend groups. Members create binary (Yes/
 | bet_id | uuid FK → bets | |
 | user_id | uuid FK → users | |
 | storage_path | text | Supabase Storage path |
-| file_type | text | MIME type |
 | caption | text | Optional user note |
-| submitted_at | timestamptz | |
 
 ### `verdicts`
 | Field | Type | Notes |
@@ -111,7 +103,6 @@ Polymates is a social betting app for friend groups. Members create binary (Yes/
 | bet_id | uuid FK → bets | |
 | outcome | enum: yes\|no | |
 | reasoning | text | ≤120 word humorous ruling |
-| resolved_at | timestamptz | |
 
 ---
 
@@ -157,6 +148,7 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 
 ### `/` — Landing
 - App pitch and sign up / log in CTA
+- Nav bar includes account menu (avatar button → sign out)
 
 ### `/dashboard` — Dashboard
 - List of groups the user belongs to
@@ -220,14 +212,10 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 
 ### Frontend — Auth
 - [x] Auth context/provider with session state
-- [x] Sign up page (email + password)
+- [x] Sign up page (email + password + username)
 - [x] Log in page (email + password)
 - [x] Protected route wrapper (redirects to login if no session)
-- [x] Sign out button
-
-### Frontend — Profile Page
-- [x] `/profile` page showing display name, avatar, per-group points breakdown
-- [x] Edit display name field
+- [x] Avatar button in navbar opens account menu (sign out)
 
 ---
 
