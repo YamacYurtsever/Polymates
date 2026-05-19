@@ -8,10 +8,13 @@ import {
   Dialog,
   DialogContent,
   Divider,
+  IconButton,
   LinearProgress,
   TextField,
   Typography,
 } from '@mui/material'
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import imageCompression from 'browser-image-compression'
 import { supabase } from '../lib/supabase'
@@ -26,7 +29,7 @@ interface EvidenceItem {
   created_at: string
 }
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB before compression
+const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf']
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
@@ -42,9 +45,8 @@ function relativeTime(iso: string): string {
   return `${Math.floor(diff / 86400)}d ago`
 }
 
-function EvidenceCard({ item }: { item: EvidenceItem }) {
+function EvidenceCard({ item, onClick }: { item: EvidenceItem; onClick: () => void }) {
   const [url, setUrl] = useState<string | null>(null)
-  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -59,95 +61,153 @@ function EvidenceCard({ item }: { item: EvidenceItem }) {
   const filename = item.storage_path.split('/').pop() ?? 'file'
 
   return (
-    <>
-      <Card
-        variant="outlined"
-        onClick={() => setOpen(true)}
-        sx={{
-          width: 160,
-          flexShrink: 0,
-          cursor: 'pointer',
-          '&:hover': { borderColor: 'text.secondary' },
-        }}
-      >
-        {url && isImage(item.storage_path) ? (
-          <Box
-            component="img"
-            src={url}
-            alt={item.caption ?? filename}
-            sx={{ width: '100%', height: 120, objectFit: 'cover', display: 'block' }}
-          />
-        ) : null}
-        <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="caption" color="text.secondary">
-              {item.username}
-            </Typography>
-            <Typography variant="caption" color="text.disabled">
-              {relativeTime(item.created_at)}
-            </Typography>
-          </Box>
-          {item.caption && (
-            <Typography
-              variant="caption"
-              sx={{
-                mt: 0.5,
-                display: 'block',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {item.caption}
-            </Typography>
-          )}
-          {url && !isImage(item.storage_path) && (
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-              PDF
-            </Typography>
-          )}
-        </CardContent>
-      </Card>
+    <Card
+      variant="outlined"
+      onClick={onClick}
+      sx={{
+        width: 160,
+        flexShrink: 0,
+        cursor: 'pointer',
+        '&:hover': { borderColor: 'text.secondary' },
+      }}
+    >
+      {url && isImage(item.storage_path) ? (
+        <Box
+          component="img"
+          src={url}
+          alt={item.caption ?? filename}
+          sx={{ width: '100%', height: 120, objectFit: 'cover', display: 'block' }}
+        />
+      ) : null}
+      <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="caption" color="text.secondary">
+            {item.username}
+          </Typography>
+          <Typography variant="caption" color="text.disabled">
+            {relativeTime(item.created_at)}
+          </Typography>
+        </Box>
+        {item.caption && (
+          <Typography
+            variant="caption"
+            sx={{
+              mt: 0.5,
+              display: 'block',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {item.caption}
+          </Typography>
+        )}
+        {url && !isImage(item.storage_path) && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+            PDF
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="lg">
-        <DialogContent>
-          {url && isImage(item.storage_path) && (
-            <Box
-              component="img"
-              src={url}
-              alt={item.caption ?? filename}
-              sx={{
-                display: 'block',
-                maxWidth: '85vw',
-                maxHeight: '70vh',
-                objectFit: 'contain',
-                mb: 2,
-              }}
-            />
-          )}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: item.caption ? 1 : 0 }}>
-            <Typography variant="body2">{item.username}</Typography>
-            <Typography variant="caption" color="text.secondary">
-              {relativeTime(item.created_at)}
-            </Typography>
+function EvidenceModal({
+  evidence,
+  index,
+  onClose,
+  onPrev,
+  onNext,
+}: {
+  evidence: EvidenceItem[]
+  index: number | null
+  onClose: () => void
+  onPrev: () => void
+  onNext: () => void
+}) {
+  const item = index !== null ? evidence[index] : null
+  const [url, setUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!item) return
+    async function load() {
+      setUrl(null)
+      const { data } = await supabase.storage
+        .from('evidence')
+        .createSignedUrl(item!.storage_path, 3600)
+      if (data) setUrl(data.signedUrl)
+    }
+    load()
+  }, [item])
+
+  if (!item) return null
+
+  const filename = item.storage_path.split('/').pop() ?? 'file'
+  const hasPrev = index !== null && index > 0
+  const hasNext = index !== null && index < evidence.length - 1
+
+  return (
+    <Dialog open={index !== null} onClose={onClose} maxWidth="lg">
+      <DialogContent sx={{ position: 'relative', p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton onClick={onPrev} disabled={!hasPrev} size="small">
+            <ArrowBackIosNewIcon fontSize="small" />
+          </IconButton>
+
+          <Box sx={{ flex: 1 }}>
+            {url && isImage(item.storage_path) && (
+              <Box
+                component="img"
+                src={url}
+                alt={item.caption ?? filename}
+                sx={{
+                  display: 'block',
+                  maxWidth: '80vw',
+                  maxHeight: '65vh',
+                  objectFit: 'contain',
+                  mx: 'auto',
+                  mb: 2,
+                }}
+              />
+            )}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: item.caption ? 1 : 0 }}>
+              <Typography variant="body2">{item.username}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {relativeTime(item.created_at)}
+              </Typography>
+            </Box>
+            {item.caption && <Typography variant="body2">{item.caption}</Typography>}
+            {url && !isImage(item.storage_path) && (
+              <Button
+                component="a"
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="small"
+                variant="outlined"
+                sx={{ mt: 1 }}
+              >
+                {filename}
+              </Button>
+            )}
           </Box>
-          {item.caption && <Typography variant="body2">{item.caption}</Typography>}
-          {url && !isImage(item.storage_path) && (
-            <Button
-              component="a"
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              size="small"
-              variant="outlined"
-              sx={{ mt: 1 }}
-            >
-              {filename}
-            </Button>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+
+          <IconButton onClick={onNext} disabled={!hasNext} size="small">
+            <ArrowForwardIosIcon fontSize="small" />
+          </IconButton>
+        </Box>
+
+        {evidence.length > 1 && (
+          <Typography
+            variant="caption"
+            color="text.disabled"
+            sx={{ display: 'block', textAlign: 'center', mt: 1 }}
+          >
+            {(index ?? 0) + 1} / {evidence.length}
+          </Typography>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -162,6 +222,7 @@ export function EvidencePanel({
 }) {
   const { user } = useAuth()
   const [evidence, setEvidence] = useState<EvidenceItem[]>([])
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [caption, setCaption] = useState('')
   const [uploading, setUploading] = useState(false)
@@ -233,7 +294,7 @@ export function EvidencePanel({
         maxSizeMB: 1,
         maxWidthOrHeight: 1920,
         useWebWorker: true,
-        onProgress: (p) => setUploadProgress(Math.round(p * 0.6)), // 0–60% for compression
+        onProgress: (p) => setUploadProgress(Math.round(p * 0.6)),
       })
     }
 
@@ -358,12 +419,20 @@ export function EvidencePanel({
         <Box>
           {canSubmit && <Divider sx={{ mb: 2 }} />}
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-            {evidence.map((item) => (
-              <EvidenceCard key={item.id} item={item} />
+            {evidence.map((item, i) => (
+              <EvidenceCard key={item.id} item={item} onClick={() => setSelectedIndex(i)} />
             ))}
           </Box>
         </Box>
       )}
+
+      <EvidenceModal
+        evidence={evidence}
+        index={selectedIndex}
+        onClose={() => setSelectedIndex(null)}
+        onPrev={() => setSelectedIndex((i) => (i !== null ? i - 1 : i))}
+        onNext={() => setSelectedIndex((i) => (i !== null ? i + 1 : i))}
+      />
     </Box>
   )
 }
