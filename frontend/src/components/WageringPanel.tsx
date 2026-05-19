@@ -3,24 +3,82 @@ import {
   Alert,
   Box,
   Button,
+  ButtonBase,
   CircularProgress,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { tokens } from '../theme'
 import type { BetPosition, BetSide } from '../types'
 
 interface Props {
   betId: string
   groupId: string
   status: 'open' | 'closed'
+  yesTotal: number
+  noTotal: number
   onWager: (position: BetPosition) => void
 }
 
-export function WageringPanel({ betId, groupId, status, onWager }: Props) {
+const QUICK_AMOUNTS = [10, 50, 100] as const
+
+function SideButton({
+  side,
+  pct,
+  selected,
+  onClick,
+}: {
+  side: BetSide
+  pct: number
+  selected: boolean
+  onClick: () => void
+}) {
+  const isYes = side === 'yes'
+  const main = isYes ? tokens.yes : tokens.no
+  const tint = isYes ? tokens.yesTint : tokens.noTint
+  return (
+    <ButtonBase
+      onClick={onClick}
+      sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: 0.5,
+        p: 1.75,
+        borderRadius: 1.25,
+        border: 1.5,
+        borderColor: selected ? main : 'divider',
+        bgcolor: selected ? tint : '#fff',
+        transition: 'border-color 150ms ease-out, background-color 150ms ease-out',
+        textAlign: 'left',
+        '&:hover': { borderColor: selected ? main : '#C8C8CD' },
+      }}
+    >
+      <Typography
+        sx={{ fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.1em', color: main }}
+      >
+        {side.toUpperCase()}
+      </Typography>
+      <Typography
+        className="tabular"
+        sx={{
+          fontWeight: 650,
+          fontSize: '1.4rem',
+          letterSpacing: '-0.02em',
+          color: main,
+          lineHeight: 1,
+        }}
+      >
+        {pct}%
+      </Typography>
+    </ButtonBase>
+  )
+}
+
+export function WageringPanel({ betId, groupId, status, yesTotal, noTotal, onWager }: Props) {
   const { user } = useAuth()
   const [points, setPoints] = useState<number | null>(null)
   const [existingPosition, setExistingPosition] = useState<BetPosition | null>(null)
@@ -106,26 +164,49 @@ export function WageringPanel({ betId, groupId, status, onWager }: Props) {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-        <CircularProgress size={24} />
+        <CircularProgress size={20} />
       </Box>
     )
   }
 
   if (existingPosition) {
+    const main = existingPosition.side === 'yes' ? tokens.yes : tokens.no
+    const tint = existingPosition.side === 'yes' ? tokens.yesTint : tokens.noTint
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          Your position:
+      <Box>
+        <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1.5 }}>
+          Your position
         </Typography>
-        <Typography
-          variant="body2"
+        <Box
           sx={{
-            fontWeight: 700,
-            color: existingPosition.side === 'yes' ? 'success.main' : 'error.main',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            p: 2,
+            border: 1.5,
+            borderColor: main,
+            bgcolor: tint,
+            borderRadius: 1.25,
           }}
         >
-          {existingPosition.side.toUpperCase()} — {existingPosition.amount} pts
-        </Typography>
+          <Typography
+            sx={{ fontWeight: 650, color: main, fontSize: '0.85rem', letterSpacing: '0.08em' }}
+          >
+            {existingPosition.side.toUpperCase()}
+          </Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          <Typography
+            className="tabular"
+            sx={{ fontWeight: 650, color: main, fontSize: '1.1rem' }}
+          >
+            {existingPosition.amount} pts
+          </Typography>
+        </Box>
+        {points !== null && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+            Balance: <span className="tabular">{points}</span> pts in this group
+          </Typography>
+        )}
       </Box>
     )
   }
@@ -141,59 +222,130 @@ export function WageringPanel({ betId, groupId, status, onWager }: Props) {
   const parsedAmount = parseInt(amount) || 0
   const isValid = parsedAmount > 0 && points !== null && parsedAmount <= points
 
+  const winningTotal = side === 'yes' ? yesTotal : noTotal
+  const losingTotal = side === 'yes' ? noTotal : yesTotal
+  const projectedShare =
+    parsedAmount > 0 && winningTotal + parsedAmount > 0
+      ? parsedAmount / (winningTotal + parsedAmount)
+      : 0
+  const projectedPayout =
+    parsedAmount > 0 ? parsedAmount + Math.floor(losingTotal * projectedShare) : 0
+
+  const total = yesTotal + noTotal
+  const yesPct = total > 0 ? Math.round((yesTotal / total) * 100) : 50
+  const noPct = 100 - yesPct
+
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-    >
-      {error && <Alert severity="error">{error}</Alert>}
+    <Box component="form" onSubmit={handleSubmit}>
+      <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1.5 }}>
+        Place a bet
+      </Typography>
 
-      <ToggleButtonGroup
-        value={side}
-        exclusive
-        onChange={(_, v) => {
-          if (v) setSide(v)
-        }}
-        size="small"
-      >
-        <ToggleButton
-          value="yes"
-          sx={{ px: 4, fontWeight: 700, '&.Mui-selected': { bgcolor: 'success.light' } }}
-        >
-          YES
-        </ToggleButton>
-        <ToggleButton
-          value="no"
-          sx={{ px: 4, fontWeight: 700, '&.Mui-selected': { bgcolor: 'error.light' } }}
-        >
-          NO
-        </ToggleButton>
-      </ToggleButtonGroup>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
+        <SideButton
+          side="yes"
+          pct={total > 0 ? yesPct : 50}
+          selected={side === 'yes'}
+          onClick={() => setSide('yes')}
+        />
+        <SideButton
+          side="no"
+          pct={total > 0 ? noPct : 50}
+          selected={side === 'no'}
+          onClick={() => setSide('no')}
+        />
+      </Box>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
         <TextField
-          label="Points to stake"
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          slotProps={{ htmlInput: { min: 1, max: points ?? undefined } }}
-          size="small"
-          sx={{ width: 180 }}
+          slotProps={{ htmlInput: { min: 1, max: points ?? undefined, inputMode: 'numeric' } }}
+          placeholder="Amount"
+          sx={{ flex: '1 1 140px', minWidth: 140 }}
           required
         />
-        {points !== null && (
-          <Typography variant="caption" color="text.secondary">
-            Balance: {points} pts
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          {QUICK_AMOUNTS.map((n) => (
+            <Button
+              key={n}
+              size="small"
+              variant="outlined"
+              onClick={() => setAmount(String(Math.min(n, points ?? n)))}
+              disabled={points !== null && n > points}
+              sx={{ minWidth: 44, px: 1 }}
+            >
+              {n}
+            </Button>
+          ))}
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => points !== null && setAmount(String(points))}
+            disabled={points === null || points === 0}
+            sx={{ minWidth: 44, px: 1 }}
+          >
+            Max
+          </Button>
+        </Box>
+      </Box>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="caption" color="text.secondary">
+          Balance:{' '}
+          <span className="tabular">
+            {points !== null ? points.toLocaleString() : '—'}
+          </span>{' '}
+          pts
+        </Typography>
+        {parsedAmount > 0 && (
+          <Typography variant="caption">
+            If you win:{' '}
+            <span
+              className="tabular"
+              style={{ fontWeight: 650, color: tokens.yes }}
+            >
+              +{projectedPayout.toLocaleString()}
+            </span>{' '}
+            pts
           </Typography>
         )}
       </Box>
 
-      <Box>
-        <Button type="submit" variant="contained" disabled={submitting || !isValid}>
-          {submitting ? 'Placing…' : 'Place Bet'}
-        </Button>
-      </Box>
+      <Button
+        type="submit"
+        variant="contained"
+        size="large"
+        fullWidth
+        disabled={submitting || !isValid}
+        sx={{
+          bgcolor: side === 'yes' ? tokens.yes : tokens.no,
+          '&:hover': {
+            bgcolor: side === 'yes' ? '#1f9b51' : '#cf3a48',
+          },
+          '&.Mui-disabled': {
+            bgcolor: tokens.hairline,
+            color: tokens.inkSecondary,
+          },
+        }}
+      >
+        {submitting
+          ? 'Placing…'
+          : isValid
+            ? `Place ${parsedAmount} on ${side.toUpperCase()}`
+            : `Place bet on ${side.toUpperCase()}`}
+      </Button>
+
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
+        Bets are locked once placed. Choose your side carefully.
+      </Typography>
     </Box>
   )
 }
