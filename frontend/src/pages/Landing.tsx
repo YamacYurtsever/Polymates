@@ -1,5 +1,5 @@
 import { Link as RouterLink, Navigate } from 'react-router-dom'
-import { Box, Button, Container, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
 import { ProbabilityBar } from '../components/ProbabilityBar'
 import { tokens } from '../theme'
