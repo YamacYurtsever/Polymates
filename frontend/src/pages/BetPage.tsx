@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link as RouterLink } from 'react-router-dom'
-import { Alert, Box, Chip, IconButton, Snackbar, Tab, Tabs, Tooltip, Typography } from '@mui/material'
-import ShareIcon from '@mui/icons-material/IosShare'
+import { Alert, Box, Button, Chip, Snackbar, Tab, Tabs, Typography } from '@mui/material'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { LoadingGavel } from '../components/LoadingGavel'
 import { supabase } from '../lib/supabase'
 import { useCountdownState } from '../hooks/useCountdown'
@@ -182,7 +182,7 @@ export function BetPage() {
   return (
     <Box sx={{ maxWidth: 880, mx: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" color="text.secondary" sx={{ flexGrow: 1 }}>
           <RouterLink
             to={`/groups/${bet.group_id}`}
             style={{ color: 'inherit', textDecoration: 'none', fontWeight: 600 }}
@@ -191,26 +191,26 @@ export function BetPage() {
           </RouterLink>
           {' · '}by {bet.creator_username}
         </Typography>
-        <Box sx={{ flexGrow: 1 }} />
         <Chip
           label={verdict ? 'resolved' : bet.status === 'open' ? 'open' : 'resolving'}
-          size="small"
           variant="outlined"
           sx={{
+            height: tokens.controlHeightSm,
             color: verdict ? tokens.brand : bet.status === 'open' ? tokens.yes : tokens.no,
           }}
         />
-        <Tooltip title="Copy bet link">
-          <IconButton
-            size="small"
-            onClick={() => {
-              navigator.clipboard.writeText(`${window.location.origin}/share/${bet.share_token}`)
-              setCopied(true)
-            }}
-          >
-            <ShareIcon sx={{ fontSize: 16 }} />
-          </IconButton>
-        </Tooltip>
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<ContentCopyIcon fontSize="small" />}
+          onClick={() => {
+            navigator.clipboard.writeText(`${window.location.origin}/share/${bet.share_token}`)
+            setCopied(true)
+          }}
+          sx={{ height: tokens.controlHeightSm }}
+        >
+          Copy link
+        </Button>
       </Box>
 
       <Typography
@@ -380,7 +380,7 @@ export function BetPage() {
         open={copied}
         autoHideDuration={2000}
         onClose={() => setCopied(false)}
-        message="Bet link copied!"
+        message="Link copied"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       />
     </Box>

@@ -23,7 +23,6 @@ export function BetSharePage() {
   const navigate = useNavigate()
   const [bet, setBet] = useState<BetPreview | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isMember, setIsMember] = useState(false)
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -71,7 +70,7 @@ export function BetSharePage() {
     }
   }
 
-  const shareUrl = window.location.href
+  const shareUrl = window.location.pathname
 
   return (
     <Box

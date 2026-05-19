@@ -407,17 +407,17 @@ The arbiter **always** returns YES or NO — no abstain. If evidence is absent o
 ## M7 — Bet Share Links
 
 ### Database
-- [ ] Add `share_token uuid not null default gen_random_uuid()` to `bets` table
-- [ ] RPC `get_bet_by_share_token(p_token uuid)` — security definer, returns bet id, title, group id, group name, closes_at, status; no auth required (bypasses RLS so anyone with the link can preview)
-- [ ] Reuse existing `join_group_by_token` RPC for the group-join step on the share page
+- [x] Add `share_token uuid not null default gen_random_uuid()` to `bets` table
+- [x] RPC `get_bet_by_share_token(p_token uuid)` — security definer, returns bet id, title, group id, group name, closes_at, status; no auth required (bypasses RLS so anyone with the link can preview)
+- [x] Reuse existing `group_members` insert for the group-join step on the share page
 
 ### Frontend — Share Page (`/share/[token]`)
-- [ ] Fetch bet + group info via `get_bet_by_share_token` RPC
-- [ ] **Not signed in**: show bet title, group name, and "Sign up / Log in to participate" CTA — auth pages receive a `?next=/share/[token]` param and redirect back after login
-- [ ] **Signed in, not in group**: show bet title + group name + "Join [group] & View Bet" button — joins group then redirects to `/bets/[id]`
-- [ ] **Signed in, already in group**: immediately redirect to `/bets/[id]`
-- [ ] Handle `?next=` redirect param in Login and SignUp pages
+- [x] Fetch bet + group info via `get_bet_by_share_token` RPC
+- [x] **Not signed in**: show bet title, group name, and "Sign up / Log in to participate" CTA — auth pages receive a `?next=/share/[token]` param and redirect back after login
+- [x] **Signed in, not in group**: show bet title + group name + "Join [group] & View Bet" button — joins group then redirects to `/bets/[id]`
+- [x] **Signed in, already in group**: immediately redirect to `/bets/[id]`
+- [x] Handle `?next=` redirect param in Login and SignUp pages (already supported)
 
 ### Frontend — Share Button (on `/bets/[id]`)
-- [ ] Copy-to-clipboard button that copies `/share/[share_token]` URL
-- [ ] Brief "Copied!" confirmation toast
+- [x] Copy-to-clipboard button that copies `/share/[share_token]` URL
+- [x] Brief "Copied!" confirmation toast
